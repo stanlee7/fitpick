@@ -1,6 +1,7 @@
 "use strict";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Instructor } from "../data/mockInstructors";
 
 interface CurationPanelProps {
@@ -14,6 +15,13 @@ export default function CurationPanel({
   selectedInstructors,
   onClearSelection,
 }: CurationPanelProps) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   const [clientName, setClientName] = useState("");
   const [inquiryTitle, setInquiryTitle] = useState("");
   const [curationNote, setCurationNote] = useState("");
@@ -23,6 +31,50 @@ export default function CurationPanel({
   
   // Tracking alerts simulation
   const [showTrackingAlert, setShowTrackingAlert] = useState(false);
+
+  // AI Recommendation Engine status
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiStatusText, setAiStatusText] = useState("");
+
+  // Curation Request Consultation states
+  const [showConsultModal, setShowConsultModal] = useState(false);
+  const [consultantName, setConsultantName] = useState("");
+  const [consultantEmail, setConsultantEmail] = useState("");
+  const [consultantPhone, setConsultantPhone] = useState("");
+  const [consultantMessage, setConsultantMessage] = useState("");
+  const [showConsultSuccessToast, setShowConsultSuccessToast] = useState(false);
+
+  const handleAiGenerate = () => {
+    if (selectedInstructors.length === 0) {
+      alert("AI 추천사를 작성하기 위해 최소 1명 이상의 강사를 먼저 제안서에 담아주세요!");
+      return;
+    }
+
+    setIsAiGenerating(true);
+    setAiStatusText("🧠 AI가 의뢰 주제와 강사 프로필 매칭 요건을 분석하는 중...");
+
+    // 1단계 로딩 시뮬레이션
+    setTimeout(() => {
+      setAiStatusText("⚡ 최적의 역량 피팅 및 에이전시 추천 소견 조합 중...");
+      
+      // 2단계 텍스트 완성
+      setTimeout(() => {
+        const title = inquiryTitle.trim() || "전문 맞춤형 강연";
+        let generatedText = `의뢰해주신 '${title}' 목적에 가장 부합하며, 업계 최상위 강의 레퍼런스를 보유한 정예 전문가 군단을 엄선하여 매칭해 드립니다.\n\n`;
+
+        selectedInstructors.forEach((inst, index) => {
+          const topTags = inst.tags.slice(0, 3).join(", ");
+          generatedText += `${index + 1}. [${inst.name} 강사]: ${inst.role} 전문가로, #${topTags} 영역 실무에 특화되어 즉각적인 교육 성과를 보장합니다.\n`;
+        });
+
+        generatedText += `\n핏픽 AI 매칭 정밀 진단 결과, 본 강사진은 풍부한 실습 중심 워크숍 경험과 평균 만족도 4.8 이상의 검증된 피드백을 갖춘 최고 평점의 정예 조합입니다. 하단 포트폴리오를 다운로드하여 직접 확인해 보시길 강력히 추천드립니다.`;
+
+        setCurationNote(generatedText);
+        setIsAiGenerating(false);
+        setAiStatusText("");
+      }, 900);
+    }, 700);
+  };
 
   const handleGenerateCuration = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +93,50 @@ export default function CurationPanel({
   };
 
   const handleCopyLink = () => {
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    const encodedClient = encodeURIComponent(clientName || "의뢰사");
+    const encodedTitle = encodeURIComponent(inquiryTitle || "전문 강연");
+    const previewUrl = `${window.location.origin}/curation/preview?client=${encodedClient}&title=${encodedTitle}&template=${template}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(previewUrl)
+        .then(() => {
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000);
+        })
+        .catch(() => {
+          alert("링크 복사 중 오류가 발생했습니다.");
+        });
+    } else {
+      // Fallback
+      const textArea = document.createElement("textarea");
+      textArea.value = previewUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      } catch (err) {
+        alert("링크 복사에 실패했습니다.");
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const handleConsultSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowConsultModal(false);
+    setShowConsultSuccessToast(true);
+
+    // Reset inputs
+    setConsultantName("");
+    setConsultantEmail("");
+    setConsultantPhone("");
+    setConsultantMessage("");
+
+    setTimeout(() => {
+      setShowConsultSuccessToast(false);
+    }, 4000);
   };
 
   // Styles based on templates (All optimized for beautiful light backgrounds)
@@ -51,42 +145,42 @@ export default function CurationPanel({
       case "neon":
         return {
           wrapper: "bg-[#f8f9fa] text-[#191f28] font-sans",
-          card: "bg-white border border-[#3182f6]/15 shadow-[0_8px_30px_rgba(49,130,246,0.04)] rounded-3xl",
-          headerBg: "bg-gradient-to-r from-brand-blue to-indigo-600 text-transparent bg-clip-text",
-          accentColor: "text-brand-blue",
-          badgeColor: "bg-brand-blue-light text-brand-blue border-brand-blue/20",
-          button: "bg-gradient-to-r from-brand-blue to-indigo-600 text-white font-bold hover:opacity-90",
-          title: "Neon Light 테마"
+          card: "bg-white border border-[#3182f6]/20 shadow-[0_16px_40px_rgba(49,130,246,0.06)] rounded-[28px] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(49,130,246,0.1)] hover:scale-[1.01]",
+          headerBg: "bg-gradient-to-r from-[#3182f6] via-indigo-500 to-purple-600 text-transparent bg-clip-text font-black",
+          accentColor: "text-[#3182f6] font-extrabold tracking-wider",
+          badgeColor: "bg-blue-50 text-[#3182f6] border-[#3182f6]/30",
+          button: "bg-gradient-to-r from-[#3182f6] to-indigo-600 text-white font-bold hover:shadow-[0_4px_15px_rgba(49,130,246,0.3)] transform hover:-translate-y-0.5 active:translate-y-0 transition-all",
+          title: "✨ Neon Light 테마"
         };
       case "minimal":
         return {
-          wrapper: "bg-[#f2f4f6] text-[#191f28] font-sans",
-          card: "bg-white border border-slate-100 shadow-sm rounded-3xl",
-          headerBg: "text-slate-900 font-bold",
-          accentColor: "text-slate-800",
-          badgeColor: "bg-slate-100 text-slate-700 border-slate-200",
-          button: "bg-slate-900 text-white font-semibold hover:bg-slate-800",
-          title: "Sleek Minimal 테마"
+          wrapper: "bg-[#f4f6f8] text-[#191f28] font-sans",
+          card: "bg-white border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)] rounded-[24px] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(0,0,0,0.03)] hover:scale-[1.01]",
+          headerBg: "text-slate-900 font-extrabold tracking-tight",
+          accentColor: "text-slate-500 font-semibold uppercase tracking-widest",
+          badgeColor: "bg-slate-50 text-slate-600 border-slate-200/60",
+          button: "bg-[#191f28] hover:bg-[#191f28]/95 text-white font-semibold transform hover:-translate-y-0.5 active:translate-y-0 transition-all",
+          title: "🕊️ Sleek Minimal 테마"
         };
       case "notion":
         return {
           wrapper: "bg-white text-[#191f28] font-sans",
-          card: "bg-white border border-slate-200 rounded-lg shadow-none hover:shadow-sm transition-shadow",
-          headerBg: "text-slate-900 font-serif border-b pb-4",
-          accentColor: "text-slate-850",
-          badgeColor: "bg-slate-100 text-slate-650 border-slate-200 rounded-md",
-          button: "bg-white border border-slate-350 text-slate-700 font-medium hover:bg-slate-50",
-          title: "Notion 표준 테마"
+          card: "bg-white border-2 border-slate-200 rounded-2xl shadow-none hover:bg-slate-50/10 transition-colors",
+          headerBg: "text-slate-900 font-serif border-b-2 border-slate-200 pb-4 font-black",
+          accentColor: "text-slate-700 font-mono font-bold",
+          badgeColor: "bg-slate-100 text-slate-750 border-slate-350 rounded-md font-mono",
+          button: "bg-white border-2 border-slate-300 text-slate-800 font-bold hover:bg-slate-50 active:bg-slate-100 transition-colors",
+          title: "📓 Notion 표준 테마"
         };
       case "gold":
         return {
           wrapper: "bg-[#faf8f5] text-[#191f28] font-sans",
-          card: "bg-white border border-amber-500/15 shadow-[0_8px_30px_rgba(217,119,6,0.03)] rounded-3xl",
-          headerBg: "bg-gradient-to-r from-amber-600 to-yellow-600 text-transparent bg-clip-text",
-          accentColor: "text-amber-650",
-          badgeColor: "bg-amber-50 text-amber-600 border-amber-200/50",
-          button: "bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold",
-          title: "Premium Gold Light 테마"
+          card: "bg-white border border-amber-500/20 shadow-[0_16px_40px_rgba(217,119,6,0.04)] rounded-[30px] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(217,119,6,0.08)] hover:scale-[1.01]",
+          headerBg: "bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 text-transparent bg-clip-text font-black",
+          accentColor: "text-amber-600 font-extrabold tracking-wider",
+          badgeColor: "bg-amber-50 text-amber-650 border-amber-200/50",
+          button: "bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-bold hover:shadow-[0_4px_15px_rgba(217,119,6,0.25)] transform hover:-translate-y-0.5 active:translate-y-0 transition-all",
+          title: "👑 Premium Gold Light 테마"
         };
     }
   };
@@ -182,16 +276,45 @@ export default function CurationPanel({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-text-slate uppercase tracking-wider block mb-1">
-                  큐레이션 추천 코멘트 (에이전시 종합 소견)
-                </label>
-                <textarea
-                  placeholder="예: 의뢰하신 목적에 가장 알맞은 포트폴리오를 보유한 정예 강사진입니다. 실습 위주의 진행과 풍부한 대기업 레퍼런스를 보유하여 성공적인 교육이 보장됩니다."
-                  value={curationNote}
-                  onChange={(e) => setCurationNote(e.target.value)}
-                  rows={3}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/20 transition-all resize-none leading-relaxed placeholder:text-slate-400"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[10px] font-semibold text-text-slate uppercase tracking-wider">
+                    큐레이션 추천 코멘트 (에이전시 종합 소견)
+                  </label>
+                  <button
+                    type="button"
+                    disabled={isAiGenerating}
+                    onClick={handleAiGenerate}
+                    className="flex items-center gap-1.5 text-[9px] px-2.5 py-1 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100/90 border border-purple-150 font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm active:scale-95"
+                  >
+                    {isAiGenerating ? (
+                      <span className="flex h-1.5 w-1.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
+                      </span>
+                    ) : (
+                      "✨"
+                    )}
+                    AI 추천사 즉시 생성
+                  </button>
+                </div>
+                
+                {isAiGenerating ? (
+                  <div className="w-full bg-purple-50/40 border border-purple-100/60 rounded-2xl px-4 py-6 flex flex-col items-center justify-center text-center space-y-2.5 animate-pulse min-h-[96px]">
+                    <svg className="w-5 h-5 text-purple-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p className="text-[10px] font-bold text-purple-800 leading-normal font-mono">{aiStatusText}</p>
+                  </div>
+                ) : (
+                  <textarea
+                    placeholder="예: 의뢰하신 목적에 가장 알맞은 포트폴리오를 보유한 정예 강사진입니다. 실습 위주의 진행과 풍부한 대기업 레퍼런스를 보유하여 성공적인 교육이 보장됩니다."
+                    value={curationNote}
+                    onChange={(e) => setCurationNote(e.target.value)}
+                    rows={3}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/20 transition-all resize-none leading-relaxed placeholder:text-slate-400"
+                  />
+                )}
               </div>
             </div>
 
@@ -255,8 +378,8 @@ export default function CurationPanel({
       )}
 
       {/* CLIENT CURATION PREVIEW MODAL */}
-      {showClientPreview && (
-        <div className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-[4px] overflow-y-auto p-4 md:p-8 flex justify-center">
+      {showClientPreview && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-900/30 backdrop-blur-[4px] overflow-y-auto p-4 md:p-8 flex justify-center">
           <div className={`w-full max-w-4xl rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.08)] my-auto border border-slate-100 relative ${style.wrapper}`}>
             
             {/* Modal Controls Banner (Agency Only view) */}
@@ -396,7 +519,10 @@ export default function CurationPanel({
                   마음에 드는 강사를 선택하셨거나 상세 일정 및 견적 조율이 필요하신가요?
                 </p>
                 <button
-                  onClick={() => alert("에이전시 측으로 조율 접수가 접수되었습니다. 24시간 내에 연락드립니다!")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowConsultModal(true);
+                  }}
                   className={`px-8 py-3.5 rounded-2xl shadow-lg transition-all active:scale-95 text-xs md:text-sm font-bold cursor-pointer ${style.button}`}
                 >
                   추천 강사 매칭 조율 상담 요청하기
@@ -405,7 +531,118 @@ export default function CurationPanel({
 
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 1. CONSULTATION REQUEST MODAL */}
+      {showConsultModal && mounted && createPortal(
+        <div className="fixed inset-0 z-[10000] bg-slate-900/40 backdrop-blur-[5px] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] border border-slate-100 w-full max-w-md overflow-hidden shadow-[0_24px_70px_rgba(0,0,0,0.15)] relative animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-brand-blue"></div>
+            
+            <div className="p-8 pt-10">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-blue-50/70 border border-blue-100 text-brand-blue">
+                    <svg className="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base font-extrabold text-slate-950 font-outfit">강사 매칭 조율 상담 신청</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConsultModal(false)}
+                  className="p-1.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-400 hover:text-slate-700 transition-all cursor-pointer"
+                >
+                  <svg className="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleConsultSubmit} className="space-y-4 text-left">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">담당자 성함 / 의뢰사</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="홍길동 대리 (SK하이닉스)"
+                    value={consultantName}
+                    onChange={(e) => setConsultantName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">이메일</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="gildong@company.com"
+                      value={consultantEmail}
+                      onChange={(e) => setConsultantEmail(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">연락처</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="010-0000-0000"
+                      value={consultantPhone}
+                      onChange={(e) => setConsultantPhone(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">조율 및 상담 문의 내용</label>
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="희망하시는 교육 일정, 선호 강사, 강의 예산 조건 등 문의 사항을 남겨주시면 큐레이터가 정교하게 맞춤 제안을 보강해 드립니다."
+                    value={consultantMessage}
+                    onChange={(e) => setConsultantMessage(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-brand-blue resize-none leading-relaxed"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold rounded-2xl shadow-[0_4px_15px_rgba(49,130,246,0.15)] active:scale-95 transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                >
+                  ✉️ 조율 상담 접수하기
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 2. CONSULTATION SUCCESS TOAST */}
+      {showConsultSuccessToast && mounted && createPortal(
+        <div className="fixed bottom-6 right-6 z-[10001] p-5 rounded-[24px] bg-white border border-emerald-150 shadow-[0_16px_50px_rgba(45,202,115,0.15)] max-w-sm animate-in fade-in slide-in-from-bottom duration-300">
+          <div className="flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-success-green" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="text-xs font-extrabold text-slate-900">🎉 조율 상담 접수 완료!</h4>
+              <p className="text-[10px] text-text-slate mt-1 leading-relaxed">
+                강사 매칭 조율 상담 요청이 안전하게 접수되었습니다. <strong>24시간 이내</strong>에 에이전시 큐레이터가 신속하게 답변해 드립니다!
+              </p>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
     </div>

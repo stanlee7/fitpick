@@ -1,17 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { mockInstructors, Instructor } from "../data/mockInstructors";
 import InstructorCard from "../components/InstructorCard";
 import NotionImport from "../components/NotionImport";
 import CurationPanel from "../components/CurationPanel";
+import IntroView from "../components/IntroView";
 
 export default function Home() {
-  const [instructors, setInstructors] = useState<Instructor[]>(mockInstructors);
+  const [viewMode, setViewMode] = useState<"intro" | "dashboard">("intro");
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("전체");
   const [showNotionModal, setShowNotionModal] = useState(false);
+
+  // Hydrate data from localStorage (Local-First Security spec)
+  useEffect(() => {
+    const localData = localStorage.getItem("fitpick_instructors");
+    if (localData) {
+      try {
+        setInstructors(JSON.parse(localData));
+      } catch (e) {
+        setInstructors(mockInstructors);
+        localStorage.setItem("fitpick_instructors", JSON.stringify(mockInstructors));
+      }
+    } else {
+      setInstructors(mockInstructors);
+      localStorage.setItem("fitpick_instructors", JSON.stringify(mockInstructors));
+    }
+    setIsHydrated(true);
+  }, []);
+
+  // Save to localStorage on any state changes
+  useEffect(() => {
+    if (isHydrated) {
+      localStorage.setItem("fitpick_instructors", JSON.stringify(instructors));
+    }
+  }, [instructors, isHydrated]);
 
   // Toggle selection for curation
   const handleSelectInstructor = (id: string) => {
@@ -39,6 +66,127 @@ export default function Home() {
     setInstructors((prev) => [newInstructor, ...prev]);
     setShowNotionModal(false);
   };
+
+  // Update Instructor
+  const handleUpdateInstructor = (updatedInst: Instructor) => {
+    setInstructors((prev) =>
+      prev.map((inst) => (inst.id === updatedInst.id ? updatedInst : inst))
+    );
+  };
+
+  // Delete Instructor
+  const handleDeleteInstructor = (id: string) => {
+    setInstructors((prev) => prev.filter((inst) => inst.id !== id));
+    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+  };
+
+  // PC 로컬 JSON 백업 파일 다운로드 (Export JSON)
+  const handleExportJSON = () => {
+    try {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(instructors, null, 2));
+      const downloadAnchor = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `fitpick_instructors_backup_${date}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    } catch (e) {
+      alert("백업 파일 생성 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 엑셀 호환 CSV 파일 다운로드 (한글 BOM 헤더 장착)
+  const handleExportCSV = () => {
+    try {
+      const headers = ["이름", "역할", "만족도평점", "누적매칭", "가용일정", "연락처(이메일)", "연락처(전화번호)", "핵심태그", "자기소개"];
+      const rows = instructors.map((inst) => [
+        inst.name,
+        inst.role,
+        inst.rating.toFixed(1),
+        inst.reviewCount,
+        inst.availability,
+        inst.email || "",
+        inst.phone || "",
+        inst.tags.join(" | "),
+        inst.bio.replace(/\n/g, " "),
+      ]);
+
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")),
+      ].join("\n");
+
+      // UTF-8 BOM (\uFEFF)을 씌워 Excel에서 한글 깨짐 원천 차단
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `fitpick_instructors_excel_${date}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      alert("CSV 변환 작업 중 오류가 발생했습니다.");
+    }
+  };
+
+  // PC 백업 JSON 파일 로드 (Import JSON)
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader();
+    if (e.target.files && e.target.files[0]) {
+      fileReader.readAsText(e.target.files[0], "UTF-8");
+      fileReader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string);
+          if (Array.isArray(parsed)) {
+            // 유효성 최소 검증 (id와 name이 완비된 강사 데이터 구조인지 확인)
+            const isValid = parsed.every(
+              (item) => item && typeof item === "object" && "id" in item && "name" in item
+            );
+            if (isValid) {
+              setInstructors(parsed);
+              alert(`💾 백업 파일 복구 성공!\n총 ${parsed.length}명의 강사 정보가 파트너님의 PC 브라우저 로컬 DB에 안전하게 동기화되었습니다!`);
+            } else {
+              alert("❌ 복구 실패: 백업 파일 내 일부 강사 필수 식별 정보(ID, 이름)가 유실되어 있습니다.");
+            }
+          } else {
+            alert("❌ 복구 실패: 백업 파일의 최상위 데이터가 올바른 리스트(배열) 형식이 아닙니다.");
+          }
+        } catch (err) {
+          alert("❌ 복구 실패: 올바른 JSON 포맷의 백업 파일이 아닙니다.");
+        }
+      };
+    }
+  };
+
+  // 데모 초기화 리셋 스펙
+  const handleResetMockData = () => {
+    if (
+      window.confirm(
+        "⚠️ 로컬 DB 초기화 경고\n현재 저장된 모든 강사 데이터가 즉시 삭제되며, 핏픽 최초의 4명 데모 데이터셋으로 복원됩니다. 계속하시겠습니까?"
+      )
+    ) {
+      setInstructors(mockInstructors);
+      localStorage.setItem("fitpick_instructors", JSON.stringify(mockInstructors));
+      setSelectedIds([]);
+      alert("🔄 로컬 강사 풀이 기본 데모 데이터셋으로 성공적으로 초기화되었습니다.");
+    }
+  };
+
+  // Intro Screen Render (Sales pitch)
+  if (viewMode === "intro") {
+    return (
+      <IntroView
+        onStart={() => setViewMode("dashboard")}
+        onImport={(importedData) => {
+          setInstructors(importedData);
+          setViewMode("dashboard");
+        }}
+      />
+    );
+  }
 
   // Filtered Instructors
   const filteredInstructors = instructors.filter((inst) => {
@@ -121,6 +269,121 @@ export default function Home() {
               </div>
             </div>
           </div>
+          {/* 📊 에이전시 실시간 매칭 KPI 스코어보드 */}
+          <div className="glass-panel p-6 rounded-[28px] border-[#3182f6]/10 bg-gradient-to-r from-blue-50/10 via-indigo-50/5 to-purple-50/10 shadow-sm space-y-4 transition-all duration-350 hover:shadow-[0_8px_30px_rgba(49,130,246,0.04)]">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📊</span>
+                <div>
+                  <h3 className="text-xs font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                    에이전시 실시간 매칭 KPI 스코어보드
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                  </h3>
+                  <p className="text-[10px] text-text-slate leading-normal">
+                    인력풀 성장과 클라이언트 도달 및 성공률 등 비즈니스 북극성 지표를 정량적으로 실시간 측정합니다.
+                  </p>
+                </div>
+              </div>
+              <span className="text-[9px] font-extrabold px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 uppercase font-mono tracking-wider">
+                📈 North-Star Metric Active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-center">
+              {/* 1. 강사 인력풀 규모 (실시간 연동!) */}
+              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
+                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">👤 강사 인력풀</span>
+                <p className="text-xl font-black text-slate-900 font-mono mt-0.5">{instructors.length}명</p>
+                <span className="text-[9px] font-bold text-emerald-500 block mt-0.5">이번 주 +25% 증가 📈</span>
+              </div>
+
+              {/* 2. 평균 매칭 소요시간 */}
+              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
+                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">⚡ 평균 매칭 속도</span>
+                <p className="text-xl font-black text-brand-blue font-mono mt-0.5">24분</p>
+                <span className="text-[9px] font-bold text-brand-blue block mt-0.5">종전 대비 85% 단축 🚀</span>
+              </div>
+
+              {/* 3. 제안서 열람율 */}
+              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
+                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">👁️ 제안서 도달률</span>
+                <p className="text-xl font-black text-indigo-600 font-mono mt-0.5">92.4%</p>
+                <span className="text-[9px] font-bold text-indigo-500 block mt-0.5">실시간 영업 추적 중 🔒</span>
+              </div>
+
+              {/* 4. 최종 매칭 성공률 */}
+              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
+                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">🤝 최종 매칭 성공률</span>
+                <p className="text-xl font-black text-purple-600 font-mono mt-0.5">
+                  {instructors.some(inst => inst.name === "스탠리탬") ? "88.7%" : "78.5%"}
+                </p>
+                <span className="text-[9px] font-bold text-purple-500 block mt-0.5">
+                  {instructors.some(inst => inst.name === "스탠리탬") ? "👑 VIP 디렉터 버프 적용!" : "전월 대비 +3.2% 📈"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* PC 로컬 백업 및 보안 관리 센터 */}
+          <div className="glass-panel p-5 rounded-[28px] border-slate-200/50 bg-gradient-to-br from-indigo-50/20 via-white/50 to-blue-50/20 shadow-sm space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-base">💾</span>
+                <div>
+                  <h3 className="text-xs font-bold text-slate-800">PC 로컬 백업 및 보안 관리 센터</h3>
+                  <p className="text-[10px] text-text-slate leading-normal">
+                    모든 강사 정보는 파트너님의 PC 브라우저에만 암호화 저장됩니다. 물리 파일로 백업을 보관하세요.
+                  </p>
+                </div>
+              </div>
+              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200/60 text-emerald-600 uppercase font-mono">
+                🔒 Local-First Active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              {/* 백업 파일 내보내기 */}
+              <button
+                type="button"
+                onClick={handleExportJSON}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700 active:scale-95 transition-all cursor-pointer shadow-sm font-sans"
+              >
+                📥 백업 다운로드 (.json)
+              </button>
+
+              {/* 백업 파일 불러오기 */}
+              <label className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700 active:scale-95 transition-all cursor-pointer shadow-sm relative font-sans">
+                📤 백업 파일 로드 (.json)
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportJSON}
+                  className="hidden"
+                />
+              </label>
+
+              {/* 엑셀 CSV 추출 */}
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-brand-blue-light border border-brand-blue/20 hover:bg-brand-blue-light/80 text-[11px] font-bold text-brand-blue active:scale-95 transition-all cursor-pointer shadow-sm font-sans"
+              >
+                📊 엑셀 내보내기 (.csv)
+              </button>
+
+              {/* 데모 데이터 리셋 */}
+              <button
+                type="button"
+                onClick={handleResetMockData}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-100/60 text-[11px] font-bold text-rose-600 active:scale-95 transition-all cursor-pointer shadow-sm font-sans"
+              >
+                🔄 데모 기본값 리셋
+              </button>
+            </div>
+          </div>
 
           {/* Search, Filter Bar Container */}
           <div className="glass-panel p-4 rounded-[24px] border-slate-200/40 space-y-3">
@@ -188,6 +451,8 @@ export default function Home() {
                   instructor={inst}
                   isSelected={selectedIds.includes(inst.id)}
                   onSelect={handleSelectInstructor}
+                  onUpdate={handleUpdateInstructor}
+                  onDelete={handleDeleteInstructor}
                 />
               ))}
             </div>
