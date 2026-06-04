@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import { track } from "../../lib/analytics";
 
 export default function DownloadPage() {
   // [💡 VIP 배포 팁] 파트너님의 깃허브 레포지토리 주소나 다운로드 주소에 맞춰 아래 URL을 원하는 CDN 주소로 변경하여 배포 가능합니다!
-  const GITHUB_EXE_URL = "https://github.com/stanley-tam/fitpick/releases/download/v0.3.0/FitPick_Setup_0.3.0.exe";
+  const GITHUB_EXE_URL = "https://github.com/stanlee7/fitpick/releases/download/v0.3.0/FitPick_Setup_0.3.0.exe";
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-between text-slate-900 font-sans relative overflow-hidden">
@@ -61,6 +62,7 @@ export default function DownloadPage() {
         <div className="space-y-4">
           <a
             href={GITHUB_EXE_URL}
+            onClick={() => track("app_download", { version: "0.3.0", platform: "win" })}
             className="inline-flex items-center gap-3 px-10 py-5 bg-[#3182f6] hover:bg-[#1b64da] text-white font-bold rounded-3xl shadow-[0_12px_40px_rgba(49,130,246,0.22)] hover:shadow-[0_16px_50px_rgba(49,130,246,0.32)] transform hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all text-xs md:text-sm cursor-pointer"
           >
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -69,7 +71,7 @@ export default function DownloadPage() {
             핏픽 정식 앱 초고속 다운로드 (Windows .exe)
           </a>
           <p className="text-[9px] text-slate-400 font-mono font-semibold">
-            파일명: FitPick Setup 0.3.0.exe (NSIS 설치 프로그램, 약 68MB)
+            파일명: FitPick Setup 0.3.0.exe (NSIS 설치 프로그램, 약 138MB)
           </p>
         </div>
 

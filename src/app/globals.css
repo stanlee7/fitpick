@@ -73,4 +73,66 @@ body {
   background: #b0b8c1;
 }
 
+/* ============================================
+   제안서 PDF / 인쇄 출력 (클라이언트 프리뷰 전용)
+   - 화면 전체를 숨기고, 포털로 띄운 프리뷰 모달만 인쇄
+   ============================================ */
+@media print {
+  /* body 직속 노드(앱 루트 등)를 전부 숨기고, 제안서 오버레이만 노출 */
+  body > * {
+    display: none !important;
+  }
+  body > .fitpick-print-overlay {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 모달 카드 → 전폭 백지 문서로 펼침 (둥근모서리·그림자·테두리 제거) */
+  .fitpick-print-overlay .fitpick-print-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  .fitpick-print-area {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 인쇄 시 감출 인터랙티브 UI(상단 배너·버튼 등) */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 강사 카드가 페이지 경계에서 잘리지 않도록 */
+  .print-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 색·배경을 그대로 인쇄(브라우저 기본은 배경 생략) */
+  .fitpick-print-overlay * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+}
+
 

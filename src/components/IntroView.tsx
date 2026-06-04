@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { mockInstructors } from "../data/mockInstructors";
+import { FEEDBACK_URL, track } from "../lib/analytics";
 
 interface IntroViewProps {
   onStart: () => void;
@@ -242,10 +243,24 @@ export default function IntroView({ onStart, onImport }: IntroViewProps) {
         <span className="text-[10px] text-slate-400 font-mono">
           © 2026 FitPick Enterprise. All rights reserved.
         </span>
-        <div className="flex gap-4 text-[10px] text-slate-400 font-mono">
+        <div className="flex items-center gap-4 text-[10px] text-slate-400 font-mono">
           <span className="hover:text-slate-600 transition-colors">로컬 격리 검증 완료</span>
           <span>•</span>
           <span className="hover:text-slate-600 transition-colors">B2B 무상 세일즈 배포판</span>
+          {FEEDBACK_URL && (
+            <>
+              <span>•</span>
+              <a
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track("feedback_click", { location: "intro_footer" })}
+                className="font-bold text-[#0064ff] hover:underline"
+              >
+                💬 피드백 주기 →
+              </a>
+            </>
+          )}
         </div>
       </footer>
 

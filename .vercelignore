@@ -1,0 +1,20 @@
+# Electron build output (huge — contains 100MB+ exe files)
+dist
+dist/
+
+# Electron source (not needed for web deploy)
+electron
+
+# Next.js build cache (Vercel rebuilds on its own)
+.next
+
+# Static export output (not used by Vercel)
+out
+
+# Node modules (Vercel installs fresh)
+node_modules
+
+# Misc build/test artifacts
+coverage
+build
+*.tsbuildinfo

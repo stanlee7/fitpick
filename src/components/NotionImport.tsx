@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Instructor, PortfolioItem } from "../data/mockInstructors";
+import { avatarFor } from "../lib/avatar";
 
 interface NotionImportProps {
   onClose: () => void;
@@ -41,7 +42,7 @@ export default function NotionImport({
     // Default base dummy (Jaejun agile coach)
     let name = "한재준";
     let role = "IT 대기업 출신 애자일 코치 & 스타트업 조직문화 컨설턴트";
-    let avatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=256&q=80";
+    let avatar = "";
     let hourlyRate = 170000;
     let rating = 4.9;
     let reviewCount = 12;
@@ -58,7 +59,6 @@ export default function NotionImport({
     if (urlLower.includes("minwoo") || urlLower.includes("design")) {
       name = "김민우";
       role = "UX/UI 서비스 디자인 & 피그마 실무 마스터";
-      avatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80";
       hourlyRate = 150000;
       rating = 4.9;
       reviewCount = 24;
@@ -75,7 +75,6 @@ export default function NotionImport({
     } else if (urlLower.includes("jihye") || urlLower.includes("dev") || urlLower.includes("code")) {
       name = "이지혜";
       role = "Next.js & React 모던 프론트엔드 실무 개발";
-      avatar = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&q=80";
       hourlyRate = 180000;
       rating = 4.8;
       reviewCount = 18;
@@ -91,7 +90,6 @@ export default function NotionImport({
     } else if (urlLower.includes("taeyoung") || urlLower.includes("biz")) {
       name = "박태영";
       role = "스타트업 스케일업 & B2B 비즈니스 세일즈";
-      avatar = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80";
       hourlyRate = 200000;
       rating = 5.0;
       reviewCount = 32;
@@ -107,7 +105,6 @@ export default function NotionImport({
     } else if (urlLower.includes("yoona") || urlLower.includes("marketing")) {
       name = "최윤아";
       role = "데이터 기반 그로스 마케팅 & 퍼포먼스 전략";
-      avatar = "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=256&q=80";
       hourlyRate = 160000;
       rating = 4.7;
       reviewCount = 15;
@@ -123,7 +120,6 @@ export default function NotionImport({
     } else if (urlLower.includes("2298f29004ba80b09b5ed52845b7b1f8")) {
       name = "스탠리탬";
       role = "B2B 스마트 에이전시 사업 총괄 및 교육 매칭 전략 디렉터";
-      avatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=256&q=80";
       hourlyRate = 250000;
       rating = 5.0;
       reviewCount = 50;
@@ -151,7 +147,6 @@ export default function NotionImport({
 
       name = parsedName.length > 5 ? parsedName.slice(0, 5) : parsedName;
       role = "노션 연동 전문 분야 (수정 요망)";
-      avatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=256&q=80";
       hourlyRate = 100000;
       rating = 4.5;
       reviewCount = 5;
@@ -164,6 +159,9 @@ export default function NotionImport({
         { title: `${name} 강사 2026 강의 상세 소개서.pdf`, type: "pdf" }
       ];
     }
+
+    // 오프라인·데스크톱에서도 깨지지 않도록 모든 아바타를 로컬 이니셜 아바타로 통일
+    avatar = avatarFor(name);
 
     return {
       id: randomId,

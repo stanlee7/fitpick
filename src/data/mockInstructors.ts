@@ -1,3 +1,5 @@
+import { avatarFor } from "../lib/avatar";
+
 export interface PortfolioItem {
   title: string;
   type: "slide" | "pdf" | "link" | "video";
@@ -25,7 +27,7 @@ export const mockInstructors: Instructor[] = [
     id: "inst-1",
     name: "김민우",
     role: "UX/UI 서비스 디자인 & 피그마 실무 마스터",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
+    avatar: avatarFor("김민우"),
     hourlyRate: 150000,
     rating: 4.9,
     reviewCount: 24,
@@ -45,7 +47,7 @@ export const mockInstructors: Instructor[] = [
     id: "inst-2",
     name: "이지혜",
     role: "Next.js & React 모던 프론트엔드 실무 개발",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&q=80",
+    avatar: avatarFor("이지혜"),
     hourlyRate: 180000,
     rating: 4.8,
     reviewCount: 18,
@@ -64,7 +66,7 @@ export const mockInstructors: Instructor[] = [
     id: "inst-3",
     name: "박태영",
     role: "스타트업 스케일업 & B2B 비즈니스 세일즈",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
+    avatar: avatarFor("박태영"),
     hourlyRate: 200000,
     rating: 5.0,
     reviewCount: 32,
@@ -83,7 +85,7 @@ export const mockInstructors: Instructor[] = [
     id: "inst-4",
     name: "최윤아",
     role: "데이터 기반 그로스 마케팅 & 퍼포먼스 전략",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=256&q=80",
+    avatar: avatarFor("최윤아"),
     hourlyRate: 160000,
     rating: 4.7,
     reviewCount: 15,

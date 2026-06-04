@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, shell } = require("electron");
 const path = require("path");
 
 let mainWindow;
@@ -10,7 +10,8 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     title: "핏픽 (FitPick) - 스마트 에이전시 큐레이션 엔진",
-    icon: path.join(__dirname, "../public/favicon.ico"),
+    // public/은 패키지에 포함되지 않으므로, Next가 out/으로 복사한 favicon을 사용
+    icon: path.join(__dirname, "../out/favicon.ico"),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -18,7 +19,26 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"), // 필요 시 확장 가능
     },
     // macOS의 둥근 모서리와 다크모드 윈도우 지원
-    backgroundColor: "#020617", 
+    backgroundColor: "#020617",
+  });
+
+  // 외부 링크(target="_blank" / window.open)는 앱 안이 아니라 시스템 기본 브라우저로 열기
+  // (노션 원본 열기, 피드백 폼, 포트폴리오 외부 링크 등)
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//.test(url) || url.startsWith("mailto:")) {
+      shell.openExternal(url);
+    }
+    return { action: "deny" };
+  });
+
+  // 앱 내부 문서에서 외부 사이트로의 직접 이동도 시스템 브라우저로 위임 (file:// 내부 이동은 허용)
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    if (!url.startsWith("file://")) {
+      event.preventDefault();
+      if (/^https?:\/\//.test(url)) {
+        shell.openExternal(url);
+      }
+    }
   });
 
   // 개발자 도구 및 상단 메뉴바 설정

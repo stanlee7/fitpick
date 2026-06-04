@@ -6,6 +6,7 @@ import InstructorCard from "../components/InstructorCard";
 import NotionImport from "../components/NotionImport";
 import CurationPanel from "../components/CurationPanel";
 import IntroView from "../components/IntroView";
+import { track, FEEDBACK_URL } from "../lib/analytics";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<"intro" | "dashboard">("intro");
@@ -65,6 +66,7 @@ export default function Home() {
   const handleImportSuccess = (newInstructor: Instructor) => {
     setInstructors((prev) => [newInstructor, ...prev]);
     setShowNotionModal(false);
+    track("instructor_added", { method: "notion" });
   };
 
   // Update Instructor
@@ -474,6 +476,21 @@ export default function Home() {
         </section>
 
       </main>
+
+      {/* Feedback link (NEXT_PUBLIC_FEEDBACK_URL 설정 시에만 노출) */}
+      {FEEDBACK_URL && (
+        <footer className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-200/60 flex items-center justify-center relative z-10">
+          <a
+            href={FEEDBACK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track("feedback_click", { location: "dashboard_footer" })}
+            className="flex items-center gap-1.5 text-xs font-semibold text-brand-blue hover:underline"
+          >
+            💬 핏픽을 써보고 한 줄 피드백 남기기 →
+          </a>
+        </footer>
+      )}
 
       {/* Notion Import Modal System */}
       {showNotionModal && (
