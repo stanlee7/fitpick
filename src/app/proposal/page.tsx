@@ -26,10 +26,16 @@ export default function ProposalPage() {
       setProposal(decoded);
     }
     setLoaded(true);
-    track("proposal_view");
 
-    // 열람 추적: 링크에 pid가 있으면 백엔드에 열람 1건 기록(백엔드 미설정 시 no-op)
+    // GA4 열람 추적: 의뢰사·주제·pid를 실어 "어느 제안서를 누가 열었는지" GA에서 식별 가능하게.
     const pid = new URLSearchParams(window.location.search).get("pid");
+    track("proposal_view", {
+      client: decoded?.client || "(unknown)",
+      title: decoded?.title || "",
+      pid: pid || "",
+    });
+
+    // (선택) 백엔드 추적을 켤 경우에만 동작 — NEXT_PUBLIC_API_URL 미설정 시 no-op
     if (pid && decoded) {
       pingOpen(pid, decoded.client, decoded.title);
     }
