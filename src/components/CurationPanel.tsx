@@ -6,6 +6,7 @@ import { Instructor } from "../data/mockInstructors";
 import { track } from "../lib/analytics";
 import { TemplateType, getTemplateStyles } from "../lib/templates";
 import { encodeProposal, getShareBase, SharedProposal } from "../lib/proposal";
+import { genPid, saveSentProposal } from "../lib/tracking";
 
 interface CurationPanelProps {
   selectedInstructors: Instructor[];
@@ -111,7 +112,10 @@ export default function CurationPanel({
         sampleVideoUrl: inst.sampleVideoUrl,
       })),
     };
-    const previewUrl = `${getShareBase()}/proposal#p=${encodeProposal(payload)}`;
+    // 열람 추적용 제안서 식별자(pid)를 링크에 부여하고, 보낸 내역을 로컬에 저장.
+    const pid = genPid();
+    saveSentProposal({ pid, client: payload.client, title: payload.title, createdAt: Date.now() });
+    const previewUrl = `${getShareBase()}/proposal?pid=${pid}#p=${encodeProposal(payload)}`;
     track("proposal_link_copied", { instructors: selectedInstructors.length });
 
     if (navigator.clipboard && navigator.clipboard.writeText) {

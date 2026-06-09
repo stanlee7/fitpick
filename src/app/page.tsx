@@ -6,6 +6,7 @@ import InstructorCard from "../components/InstructorCard";
 import NotionImport from "../components/NotionImport";
 import CurationPanel from "../components/CurationPanel";
 import IntroView from "../components/IntroView";
+import SentProposalsPanel from "../components/SentProposalsPanel";
 import { track, FEEDBACK_URL } from "../lib/analytics";
 
 export default function Home() {
@@ -328,6 +329,9 @@ export default function Home() {
               </button>
             </div>
           </div>
+
+          {/* 보낸 제안서 열람 현황 (백엔드 설정 시에만 표시) */}
+          <SentProposalsPanel />
 
           {/* Search, Filter Bar Container */}
           <div className="glass-panel p-4 rounded-[24px] border-slate-200/40 space-y-3">

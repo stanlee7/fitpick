@@ -6,6 +6,7 @@ import { getTemplateStyles } from "../../lib/templates";
 import { decodeProposal, SharedProposal } from "../../lib/proposal";
 import { avatarFor } from "../../lib/avatar";
 import { track } from "../../lib/analytics";
+import { pingOpen } from "../../lib/tracking";
 
 function availabilityLabel(status: string): string {
   return status || "일정 협의";
@@ -18,12 +19,20 @@ export default function ProposalPage() {
   useEffect(() => {
     const hash = window.location.hash; // "#p=...."
     const idx = hash.indexOf("p=");
+    let decoded: SharedProposal | null = null;
     if (idx >= 0) {
       // encodeProposal 이 한 번 인코딩한 문자열을 그대로 디코딩(이중 디코딩 방지)
-      setProposal(decodeProposal(hash.slice(idx + 2)));
+      decoded = decodeProposal(hash.slice(idx + 2));
+      setProposal(decoded);
     }
     setLoaded(true);
     track("proposal_view");
+
+    // 열람 추적: 링크에 pid가 있으면 백엔드에 열람 1건 기록(백엔드 미설정 시 no-op)
+    const pid = new URLSearchParams(window.location.search).get("pid");
+    if (pid && decoded) {
+      pingOpen(pid, decoded.client, decoded.title);
+    }
   }, []);
 
   // 정적 셸/하이드레이션 전엔 빈 화면
