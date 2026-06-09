@@ -109,15 +109,58 @@ export default function ProposalPage() {
 
                 <p className="text-xs text-slate-650 font-normal leading-relaxed min-h-[50px]">{inst.bio}</p>
 
-                <div className="grid grid-cols-2 gap-3 py-3 border-y border-slate-100 bg-slate-50/50 px-2 rounded-2xl">
+                {/* 신뢰신호: 강의경력(검증 #1) */}
+                <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 bg-slate-50/50 px-2 rounded-2xl">
                   <div className="text-center border-r border-slate-200/60">
-                    <span className="text-[9px] text-text-muted font-bold block">평점 및 만족도</span>
-                    <p className="text-xs font-bold text-slate-800 mt-0.5">★ {inst.rating.toFixed(1)} / 5.0</p>
+                    <span className="text-[9px] text-text-muted font-bold block">강의 경력</span>
+                    <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.yearsTeaching ? `${inst.yearsTeaching}년차` : "—"}</p>
+                  </div>
+                  <div className="text-center border-r border-slate-200/60">
+                    <span className="text-[9px] text-text-muted font-bold block">누적 강의</span>
+                    <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.sessionsCount ? `${inst.sessionsCount}회` : "—"}</p>
                   </div>
                   <div className="text-center">
-                    <span className="text-[9px] text-text-muted font-bold block">누적 강의 이력</span>
-                    <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.reviewCount}개 기업 검증</p>
+                    <span className="text-[9px] text-text-muted font-bold block">교육 인원</span>
+                    <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.traineesCount ? `${inst.traineesCount.toLocaleString()}명` : "—"}</p>
                   </div>
+                </div>
+
+                {/* 신뢰신호: 기업재직경력(검증 #2) */}
+                {inst.careerHistory && inst.careerHistory.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider block">실무 경력</span>
+                    <p className="text-[11px] text-slate-700 font-medium leading-snug">{inst.careerHistory.join("  ·  ")}</p>
+                  </div>
+                )}
+
+                {/* 신뢰신호: 강의 진행 기업(사회적 증거) */}
+                {inst.clientCompanies && inst.clientCompanies.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider block">강의 진행 기업</span>
+                    <div className="flex flex-wrap gap-1">
+                      {inst.clientCompanies.map((c, ci) => (
+                        <span key={ci} className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 font-semibold">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 신뢰신호: 실제 수강 후기 */}
+                {inst.testimonials && inst.testimonials.length > 0 && (
+                  <div className="rounded-2xl bg-brand-blue-light/40 border border-brand-blue/10 p-3 space-y-1.5">
+                    <p className="text-[11px] text-slate-700 italic leading-relaxed">“{inst.testimonials[0].quote}”</p>
+                    <p className="text-[9px] text-text-muted font-semibold text-right">— {inst.testimonials[0].author}</p>
+                  </div>
+                )}
+
+                {/* 평점 + 샘플영상 */}
+                <div className="flex items-center justify-between pt-0.5">
+                  <span className="text-[11px] font-bold text-slate-800">★ {inst.rating.toFixed(1)} <span className="text-text-muted font-normal">/ 5.0 (후기 {inst.reviewCount})</span></span>
+                  {inst.sampleVideoUrl && (
+                    <a href={inst.sampleVideoUrl} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-brand-blue hover:underline flex items-center gap-1">
+                      ▶ 강의 샘플 영상
+                    </a>
+                  )}
                 </div>
 
                 {inst.materials.length > 0 && (

@@ -113,14 +113,14 @@ export default function IntroView({ onStart, onImport }: IntroViewProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-outfit font-black text-base tracking-wider">FitPick Studio</span>
-                <span className="text-[9px] font-black tracking-widest px-2 py-0.5 rounded bg-white/15 border border-white/20 text-white uppercase font-mono">v0.3.0 Desktop</span>
+                <span className="text-[9px] font-black tracking-widest px-2 py-0.5 rounded bg-white/15 border border-white/20 text-white uppercase font-mono">v0.3.0</span>
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1.5 bg-white/15 border border-white/10 rounded-full px-3.5 py-1 text-[10px] font-bold text-white font-mono shadow-sm">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            On-Device Active
+            강사 큐레이션 스튜디오
           </div>
         </div>
       </div>
@@ -139,32 +139,53 @@ export default function IntroView({ onStart, onImport }: IntroViewProps) {
               핏픽 스튜디오 시작하기
             </h2>
             <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
-              에이전시 강사 정보 수집과 스마트 클라이언트 큐레이션을 가장 직관적이고 아름답게 설계해 보세요.
+              강사풀을 관리하고, <strong className="text-slate-700">기업이 신뢰할 제안서</strong>를 몇 분 만에 만들어 공유하세요. 강의경력·고객사·후기까지 담아 윗선 보고에 바로 쓰이는 제안서로.
             </p>
+          </div>
+
+          {/* 서비스 정의 + 동작 3단계 (첫 방문자에게 무엇을 하는 도구인지 명확히) */}
+          <div className="rounded-2xl bg-[#0064ff]/[0.04] border border-[#0064ff]/10 p-4 space-y-3">
+            <p className="text-[11px] text-slate-600 leading-relaxed text-center">
+              <strong className="text-[#0064ff]">교육 에이전시·1인 큐레이터</strong>를 위한<br />
+              <strong className="text-slate-800">강사풀 관리 + 기업 제안서 생성</strong> 도구입니다.
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { n: "1", t: "강사풀 등록", d: "경력·고객사·후기까지" },
+                { n: "2", t: "의뢰 맞춤 선택", d: "큐레이션 보드에 담기" },
+                { n: "3", t: "제안서 링크 공유", d: "기업 담당자에게 바로" },
+              ].map((s) => (
+                <div key={s.n} className="flex flex-col items-center text-center gap-1">
+                  <span className="w-5 h-5 rounded-full bg-[#0064ff] text-white text-[10px] font-black flex items-center justify-center">{s.n}</span>
+                  <span className="text-[10px] font-bold text-slate-800 leading-tight">{s.t}</span>
+                  <span className="text-[8.5px] text-slate-400 leading-tight">{s.d}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* 3. 토글 버튼을 걷어내고, 미니멀하고 고급스러운 3대 핵심 안심/기능 배지 장착 */}
           <div className="grid grid-cols-3 gap-3.5 py-2 border-t border-b border-slate-100/80">
             
-            {/* 배지 A: 로컬 보안 */}
+            {/* 배지 A: 신뢰신호 제안서 (검증된 핵심 가치) */}
             <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-[#f8fafc]/80 border border-slate-100">
-              <span className="text-lg mb-1">🔒</span>
-              <span className="text-[11px] font-bold text-slate-800">100% 로컬 보안</span>
-              <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">기기 내부 격리 저장</span>
+              <span className="text-lg mb-1">🛡️</span>
+              <span className="text-[11px] font-bold text-slate-800">신뢰신호 제안서</span>
+              <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">경력·고객사·후기 탑재</span>
             </div>
 
-            {/* 배지 B: 초고속 큐레이션 */}
+            {/* 배지 B: 빠른 큐레이션 */}
             <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-[#f8fafc]/80 border border-slate-100">
               <span className="text-lg mb-1">⚡</span>
-              <span className="text-[11px] font-bold text-slate-800">쾌속 매칭 엔진</span>
-              <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">단 30분 만에 추천</span>
+              <span className="text-[11px] font-bold text-slate-800">빠른 큐레이션</span>
+              <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">강사 선택→제안서 즉시</span>
             </div>
 
-            {/* 배지 C: 노션 호환 */}
+            {/* 배지 C: 공유 링크 */}
             <div className="flex flex-col items-center text-center p-3 rounded-2xl bg-[#f8fafc]/80 border border-slate-100">
-              <span className="text-lg mb-1">📊</span>
-              <span className="text-[11px] font-bold text-slate-800">쉬운 백업/엑셀</span>
-              <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">클릭 한 번으로 내보내기</span>
+              <span className="text-lg mb-1">🔗</span>
+              <span className="text-[11px] font-bold text-slate-800">공유 링크 전달</span>
+              <span className="text-[9px] text-slate-400 mt-0.5 leading-tight">제안서 URL 한 번에</span>
             </div>
 
           </div>
@@ -231,7 +252,7 @@ export default function IntroView({ onStart, onImport }: IntroViewProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
               </svg>
               <p className="text-xs font-bold text-slate-700">여기에 백업 파일(.json) 드래그 또는 클릭</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">안전하게 PC 로컬 DB로 즉시 복원됩니다.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">백업 파일에서 강사 풀을 즉시 복원합니다.</p>
             </div>
           </div>
 
@@ -244,7 +265,7 @@ export default function IntroView({ onStart, onImport }: IntroViewProps) {
           © 2026 FitPick Enterprise. All rights reserved.
         </span>
         <div className="flex items-center gap-4 text-[10px] text-slate-400 font-mono">
-          <span className="hover:text-slate-600 transition-colors">로컬 격리 검증 완료</span>
+          <span className="hover:text-slate-600 transition-colors">강사 큐레이션 · 제안서 생성</span>
           <span>•</span>
           <span className="hover:text-slate-600 transition-colors">B2B 무상 세일즈 배포판</span>
           {FEEDBACK_URL && (

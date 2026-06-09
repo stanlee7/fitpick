@@ -12,6 +12,14 @@ export interface SharedInstructor {
   reviewCount: number;
   availability: string;
   materials: { title: string; type: string }[];
+  // 신뢰신호 — 제안서 링크(#p=)에 함께 실려 받는 쪽에서 렌더된다.
+  yearsTeaching?: number;
+  sessionsCount?: number;
+  traineesCount?: number;
+  careerHistory?: string[];
+  clientCompanies?: string[];
+  testimonials?: { quote: string; author: string }[];
+  sampleVideoUrl?: string;
 }
 
 export interface SharedProposal {

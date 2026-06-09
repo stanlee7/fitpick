@@ -229,7 +229,7 @@ export default function Home() {
         {/* Tagline for 1Page defining core problem */}
         <div className="hidden md:block text-center max-w-md">
           <p className="text-xs text-text-slate bg-brand-blue-light border border-brand-blue/10 rounded-2xl px-4 py-2 leading-relaxed">
-            📢 <strong>에이전시 잡일 끝!</strong> 강사 정보 동기화와 클라이언트 큐레이션 한 사이클을 단 <strong>30분</strong> 안에 해결하세요.
+            📢 강사를 고르면 <strong>경력·고객사·후기까지 담긴 신뢰 제안서</strong>가 완성됩니다. 기업 담당자가 윗선 보고에 바로 쓰도록.
           </p>
         </div>
 
@@ -271,78 +271,20 @@ export default function Home() {
               </div>
             </div>
           </div>
-          {/* 📊 에이전시 실시간 매칭 KPI 스코어보드 */}
-          <div className="glass-panel p-6 rounded-[28px] border-[#3182f6]/10 bg-gradient-to-r from-blue-50/10 via-indigo-50/5 to-purple-50/10 shadow-sm space-y-4 transition-all duration-350 hover:shadow-[0_8px_30px_rgba(49,130,246,0.04)]">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">📊</span>
-                <div>
-                  <h3 className="text-xs font-black text-slate-900 tracking-tight flex items-center gap-1.5">
-                    에이전시 실시간 매칭 KPI 스코어보드
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                  </h3>
-                  <p className="text-[10px] text-text-slate leading-normal">
-                    인력풀 성장과 클라이언트 도달 및 성공률 등 비즈니스 북극성 지표를 정량적으로 실시간 측정합니다.
-                  </p>
-                </div>
-              </div>
-              <span className="text-[9px] font-extrabold px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 uppercase font-mono tracking-wider">
-                📈 North-Star Metric Active
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-center">
-              {/* 1. 강사 인력풀 규모 (실시간 연동!) */}
-              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
-                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">👤 강사 인력풀</span>
-                <p className="text-xl font-black text-slate-900 font-mono mt-0.5">{instructors.length}명</p>
-                <span className="text-[9px] font-bold text-emerald-500 block mt-0.5">이번 주 +25% 증가 📈</span>
-              </div>
-
-              {/* 2. 평균 매칭 소요시간 */}
-              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
-                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">⚡ 평균 매칭 속도</span>
-                <p className="text-xl font-black text-brand-blue font-mono mt-0.5">24분</p>
-                <span className="text-[9px] font-bold text-brand-blue block mt-0.5">종전 대비 85% 단축 🚀</span>
-              </div>
-
-              {/* 3. 제안서 열람율 */}
-              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
-                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">👁️ 제안서 도달률</span>
-                <p className="text-xl font-black text-indigo-600 font-mono mt-0.5">92.4%</p>
-                <span className="text-[9px] font-bold text-indigo-500 block mt-0.5">실시간 영업 추적 중 🔒</span>
-              </div>
-
-              {/* 4. 최종 매칭 성공률 */}
-              <div className="bg-white/60 backdrop-blur-[2px] border border-slate-200/60 p-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-sm">
-                <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">🤝 최종 매칭 성공률</span>
-                <p className="text-xl font-black text-purple-600 font-mono mt-0.5">
-                  {instructors.some(inst => inst.name === "스탠리탬") ? "88.7%" : "78.5%"}
-                </p>
-                <span className="text-[9px] font-bold text-purple-500 block mt-0.5">
-                  {instructors.some(inst => inst.name === "스탠리탬") ? "👑 VIP 디렉터 버프 적용!" : "전월 대비 +3.2% 📈"}
-                </span>
-              </div>
-            </div>
-          </div>
-
           {/* PC 로컬 백업 및 보안 관리 센터 */}
           <div className="glass-panel p-5 rounded-[28px] border-slate-200/50 bg-gradient-to-br from-indigo-50/20 via-white/50 to-blue-50/20 shadow-sm space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-base">💾</span>
                 <div>
-                  <h3 className="text-xs font-bold text-slate-800">PC 로컬 백업 및 보안 관리 센터</h3>
+                  <h3 className="text-xs font-bold text-slate-800">데이터 백업 / 내보내기</h3>
                   <p className="text-[10px] text-text-slate leading-normal">
-                    모든 강사 정보는 파트너님의 PC 브라우저에만 암호화 저장됩니다. 물리 파일로 백업을 보관하세요.
+                    강사 풀을 백업 파일(.json)이나 엑셀(.csv)로 내보내 안전하게 보관하세요.
                   </p>
                 </div>
               </div>
-              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200/60 text-emerald-600 uppercase font-mono">
-                🔒 Local-First Active
+              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-500 uppercase font-mono">
+                💾 Backup
               </span>
             </div>
 

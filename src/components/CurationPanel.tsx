@@ -29,11 +29,8 @@ export default function CurationPanel({
   const [template, setTemplate] = useState<TemplateType>("neon");
   const [showClientPreview, setShowClientPreview] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  
-  // Tracking alerts simulation
-  const [showTrackingAlert, setShowTrackingAlert] = useState(false);
 
-  // AI Recommendation Engine status
+  // 추천 문구 초안 작성 상태 (로컬 템플릿 — AI 아님)
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiStatusText, setAiStatusText] = useState("");
 
@@ -45,36 +42,35 @@ export default function CurationPanel({
   const [consultantMessage, setConsultantMessage] = useState("");
   const [showConsultSuccessToast, setShowConsultSuccessToast] = useState(false);
 
+  // 선택한 강사 정보를 조합해 추천 코멘트 '초안'을 만든다 (로컬 템플릿 — 실제 AI 아님).
   const handleAiGenerate = () => {
     if (selectedInstructors.length === 0) {
-      alert("AI 추천사를 작성하기 위해 최소 1명 이상의 강사를 먼저 제안서에 담아주세요!");
+      alert("추천 문구 초안을 만들려면 먼저 강사를 1명 이상 제안서에 담아주세요!");
       return;
     }
 
     setIsAiGenerating(true);
-    setAiStatusText("🧠 AI가 의뢰 주제와 강사 프로필 매칭 요건을 분석하는 중...");
+    setAiStatusText("선택한 강사 정보로 추천 문구 초안을 구성하는 중...");
 
-    // 1단계 로딩 시뮬레이션
     setTimeout(() => {
-      setAiStatusText("⚡ 최적의 역량 피팅 및 에이전시 추천 소견 조합 중...");
-      
-      // 2단계 텍스트 완성
-      setTimeout(() => {
-        const title = inquiryTitle.trim() || "전문 맞춤형 강연";
-        let generatedText = `의뢰해주신 '${title}' 목적에 가장 부합하며, 업계 최상위 강의 레퍼런스를 보유한 정예 전문가 군단을 엄선하여 매칭해 드립니다.\n\n`;
+      const title = inquiryTitle.trim() || "전문 맞춤형 강연";
+      let generatedText = `의뢰해주신 '${title}' 주제에 적합한 검증된 강사진을 아래와 같이 추천드립니다.\n\n`;
 
-        selectedInstructors.forEach((inst, index) => {
-          const topTags = inst.tags.slice(0, 3).join(", ");
-          generatedText += `${index + 1}. [${inst.name} 강사]: ${inst.role} 전문가로, #${topTags} 영역 실무에 특화되어 즉각적인 교육 성과를 보장합니다.\n`;
-        });
+      selectedInstructors.forEach((inst, index) => {
+        const topTags = inst.tags.slice(0, 3).join(", ");
+        const career = inst.yearsTeaching ? `강의 경력 ${inst.yearsTeaching}년차, ` : "";
+        const clients = inst.clientCompanies && inst.clientCompanies.length > 0
+          ? ` (${inst.clientCompanies.slice(0, 3).join(", ")} 등 강의 진행)`
+          : "";
+        generatedText += `${index + 1}. ${inst.name} 강사 — ${inst.role} (${career}#${topTags})${clients}\n`;
+      });
 
-        generatedText += `\n핏픽 AI 매칭 정밀 진단 결과, 본 강사진은 풍부한 실습 중심 워크숍 경험과 평균 만족도 4.8 이상의 검증된 피드백을 갖춘 최고 평점의 정예 조합입니다. 하단 포트폴리오를 다운로드하여 직접 확인해 보시길 강력히 추천드립니다.`;
+      generatedText += `\n※ 본 초안은 자동 생성된 기본 문구입니다. 의뢰 맥락에 맞게 직접 다듬어 보내주세요.`;
 
-        setCurationNote(generatedText);
-        setIsAiGenerating(false);
-        setAiStatusText("");
-      }, 900);
-    }, 700);
+      setCurationNote(generatedText);
+      setIsAiGenerating(false);
+      setAiStatusText("");
+    }, 500);
   };
 
   const handleGenerateCuration = (e: React.FormEvent) => {
@@ -88,13 +84,6 @@ export default function CurationPanel({
       instructors: selectedInstructors.length,
       template,
     });
-
-    // Simulate real-time tracking notification after 4 seconds
-    setTimeout(() => {
-      setShowTrackingAlert(true);
-      // Auto-hide alert after 5 seconds
-      setTimeout(() => setShowTrackingAlert(false), 5000);
-    }, 4000);
   };
 
   const handleCopyLink = () => {
@@ -112,6 +101,14 @@ export default function CurationPanel({
         reviewCount: inst.reviewCount,
         availability: inst.availability,
         materials: inst.portfolioItems.map((m) => ({ title: m.title, type: m.type })),
+        // 신뢰신호 동봉
+        yearsTeaching: inst.yearsTeaching,
+        sessionsCount: inst.sessionsCount,
+        traineesCount: inst.traineesCount,
+        careerHistory: inst.careerHistory,
+        clientCompanies: inst.clientCompanies,
+        testimonials: inst.testimonials,
+        sampleVideoUrl: inst.sampleVideoUrl,
       })),
     };
     const previewUrl = `${getShareBase()}/proposal#p=${encodeProposal(payload)}`;
@@ -163,6 +160,25 @@ export default function CurationPanel({
   const handleConsultSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     track("consult_request", { client: clientName || "unknown" });
+
+    // 실제 동작: 입력 내용을 메일 초안으로 만들어 기본 메일 클라이언트로 전달.
+    // 수신자는 큐레이터 이메일(env)로, 없으면 사용자가 직접 채우도록 빈값.
+    const to = process.env.NEXT_PUBLIC_CONSULT_EMAIL || "";
+    const subject = `[강사 매칭 상담] ${clientName || "의뢰사"} · ${inquiryTitle || "강연 문의"}`;
+    const body = [
+      `■ 담당자/의뢰사: ${consultantName}`,
+      `■ 이메일: ${consultantEmail}`,
+      `■ 연락처: ${consultantPhone}`,
+      "",
+      "■ 문의 내용:",
+      consultantMessage,
+    ].join("\n");
+    const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    if (typeof window !== "undefined") {
+      window.location.href = mailto;
+    }
+
     setShowConsultModal(false);
     setShowConsultSuccessToast(true);
 
@@ -174,7 +190,7 @@ export default function CurationPanel({
 
     setTimeout(() => {
       setShowConsultSuccessToast(false);
-    }, 4000);
+    }, 5000);
   };
 
   const style = getTemplateStyles(template);
@@ -276,17 +292,18 @@ export default function CurationPanel({
                     type="button"
                     disabled={isAiGenerating}
                     onClick={handleAiGenerate}
-                    className="flex items-center gap-1.5 text-[9px] px-2.5 py-1 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100/90 border border-purple-150 font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm active:scale-95"
+                    className="flex items-center gap-1.5 text-[9px] px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200/80 border border-slate-200 font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm active:scale-95"
+                    title="선택한 강사 정보로 추천 문구 초안을 자동 작성합니다 (직접 다듬어 사용)"
                   >
                     {isAiGenerating ? (
                       <span className="flex h-1.5 w-1.5 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-slate-500"></span>
                       </span>
                     ) : (
-                      "✨"
+                      "✍️"
                     )}
-                    AI 추천사 즉시 생성
+                    추천 문구 초안 작성
                   </button>
                 </div>
                 
@@ -347,26 +364,6 @@ export default function CurationPanel({
             클라이언트 제안 페이지 자동 생성 및 발송
           </button>
         </form>
-      )}
-
-      {/* Real-time Tracking Alert Overlay */}
-      {showTrackingAlert && (
-        <div className="fixed bottom-6 left-6 z-50 p-5 rounded-[24px] bg-white border border-emerald-150 shadow-[0_12px_40px_rgba(45,202,115,0.12)] max-w-sm animate-bounce">
-          <div className="flex items-start gap-3.5">
-            <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-success-green animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="text-xs font-extrabold text-slate-900">🔥 실시간 열람 알림! (추적)</h4>
-              <p className="text-[10px] text-text-slate mt-1 leading-relaxed">
-                클라이언트 <strong>{clientName || "의뢰사"}</strong>가 방금 스마트 제안서를 열어 강사 프로필 카드를 확인했습니다!
-              </p>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* CLIENT CURATION PREVIEW MODAL */}
@@ -476,16 +473,64 @@ export default function CurationPanel({
                         {inst.bio}
                       </p>
 
-                      {/* Client-visible Specs */}
-                      <div className="grid grid-cols-2 gap-3 py-3 border-y border-slate-100 bg-slate-50/50 px-2 rounded-2xl">
+                      {/* 신뢰신호: 강의경력(검증 #1) */}
+                      <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 bg-slate-50/50 px-2 rounded-2xl">
                         <div className="text-center border-r border-slate-200/60">
-                          <span className="text-[9px] text-text-muted font-bold block">평점 및 만족도</span>
-                          <p className="text-xs font-bold text-slate-800 mt-0.5">★ {inst.rating.toFixed(1)} / 5.0</p>
+                          <span className="text-[9px] text-text-muted font-bold block">강의 경력</span>
+                          <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.yearsTeaching ? `${inst.yearsTeaching}년차` : "—"}</p>
+                        </div>
+                        <div className="text-center border-r border-slate-200/60">
+                          <span className="text-[9px] text-text-muted font-bold block">누적 강의</span>
+                          <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.sessionsCount ? `${inst.sessionsCount}회` : "—"}</p>
                         </div>
                         <div className="text-center">
-                          <span className="text-[9px] text-text-muted font-bold block">누적 강의 이력</span>
-                          <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.reviewCount}개 기업 검증</p>
+                          <span className="text-[9px] text-text-muted font-bold block">교육 인원</span>
+                          <p className="text-xs font-bold text-slate-800 mt-0.5">{inst.traineesCount ? `${inst.traineesCount.toLocaleString()}명` : "—"}</p>
                         </div>
+                      </div>
+
+                      {/* 신뢰신호: 기업재직경력(검증 #2) */}
+                      {inst.careerHistory && inst.careerHistory.length > 0 && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider block">실무 경력</span>
+                          <p className="text-[11px] text-slate-700 font-medium leading-snug">{inst.careerHistory.join("  ·  ")}</p>
+                        </div>
+                      )}
+
+                      {/* 신뢰신호: 강의 진행 기업(사회적 증거) */}
+                      {inst.clientCompanies && inst.clientCompanies.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider block">강의 진행 기업</span>
+                          <div className="flex flex-wrap gap-1">
+                            {inst.clientCompanies.map((c, ci) => (
+                              <span key={ci} className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 font-semibold">{c}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 신뢰신호: 실제 수강 후기 */}
+                      {inst.testimonials && inst.testimonials.length > 0 && (
+                        <div className="rounded-2xl bg-brand-blue-light/40 border border-brand-blue/10 p-3 space-y-1.5">
+                          <p className="text-[11px] text-slate-700 italic leading-relaxed">“{inst.testimonials[0].quote}”</p>
+                          <p className="text-[9px] text-text-muted font-semibold text-right">— {inst.testimonials[0].author}</p>
+                        </div>
+                      )}
+
+                      {/* 평점 + 샘플영상 */}
+                      <div className="flex items-center justify-between pt-0.5">
+                        <span className="text-[11px] font-bold text-slate-800">★ {inst.rating.toFixed(1)} <span className="text-text-muted font-normal">/ 5.0 (후기 {inst.reviewCount})</span></span>
+                        {inst.sampleVideoUrl && (
+                          <a
+                            href={inst.sampleVideoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[10px] font-bold text-brand-blue hover:underline flex items-center gap-1"
+                          >
+                            ▶ 강의 샘플 영상
+                          </a>
+                        )}
                       </div>
 
                       {/* Downloadable Materials for Clients */}
@@ -499,7 +544,7 @@ export default function CurationPanel({
                             href="#download"
                             onClick={(e) => {
                               e.preventDefault();
-                              alert(`'${item.title}' 파일 다운로드를 개시합니다! (체크아웃 추적 코드 작동)`);
+                              alert(`'${item.title}'\n자료 원본은 강사에게 요청해 제안서에 첨부해 주세요.`);
                             }}
                             className="flex items-center p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-150 text-xs text-text-slate hover:text-slate-900 transition-colors"
                           >
@@ -637,9 +682,9 @@ export default function CurationPanel({
               </svg>
             </div>
             <div>
-              <h4 className="text-xs font-extrabold text-slate-900">🎉 조율 상담 접수 완료!</h4>
+              <h4 className="text-xs font-extrabold text-slate-900">✉️ 메일 작성 창을 열었습니다</h4>
               <p className="text-[10px] text-text-slate mt-1 leading-relaxed">
-                강사 매칭 조율 상담 요청이 안전하게 접수되었습니다. <strong>24시간 이내</strong>에 에이전시 큐레이터가 신속하게 답변해 드립니다!
+                입력하신 내용으로 메일 초안이 만들어졌습니다. <strong>전송</strong>하시면 큐레이터에게 문의가 전달됩니다.
               </p>
             </div>
           </div>

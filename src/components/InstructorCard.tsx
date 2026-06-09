@@ -37,6 +37,16 @@ export default function InstructorCard({
   const [editedPortfolioItems, setEditedPortfolioItems] = useState<PortfolioItem[]>(instructor.portfolioItems);
   const [editedAvatar, setEditedAvatar] = useState(instructor.avatar);
 
+  // 신뢰신호(Trust signals) editable fields
+  const [editedYearsTeaching, setEditedYearsTeaching] = useState<number | "">(instructor.yearsTeaching ?? "");
+  const [editedSessionsCount, setEditedSessionsCount] = useState<number | "">(instructor.sessionsCount ?? "");
+  const [editedTraineesCount, setEditedTraineesCount] = useState<number | "">(instructor.traineesCount ?? "");
+  const [editedCareerInput, setEditedCareerInput] = useState((instructor.careerHistory ?? []).join(", "));
+  const [editedClientsInput, setEditedClientsInput] = useState((instructor.clientCompanies ?? []).join(", "));
+  const [editedTestimonialQuote, setEditedTestimonialQuote] = useState(instructor.testimonials?.[0]?.quote ?? "");
+  const [editedTestimonialAuthor, setEditedTestimonialAuthor] = useState(instructor.testimonials?.[0]?.author ?? "");
+  const [editedSampleVideoUrl, setEditedSampleVideoUrl] = useState(instructor.sampleVideoUrl ?? "");
+
   // Local state for adding portfolio item (link/file)
   const [activeUploadTab, setActiveUploadTab] = useState<"file" | "link">("file");
   const [newLinkTitle, setNewLinkTitle] = useState("");
@@ -85,7 +95,15 @@ export default function InstructorCard({
     setEditedReviewCount(instructor.reviewCount);
     setEditedPortfolioItems(instructor.portfolioItems);
     setEditedAvatar(instructor.avatar);
-    
+    setEditedYearsTeaching(instructor.yearsTeaching ?? "");
+    setEditedSessionsCount(instructor.sessionsCount ?? "");
+    setEditedTraineesCount(instructor.traineesCount ?? "");
+    setEditedCareerInput((instructor.careerHistory ?? []).join(", "));
+    setEditedClientsInput((instructor.clientCompanies ?? []).join(", "));
+    setEditedTestimonialQuote(instructor.testimonials?.[0]?.quote ?? "");
+    setEditedTestimonialAuthor(instructor.testimonials?.[0]?.author ?? "");
+    setEditedSampleVideoUrl(instructor.sampleVideoUrl ?? "");
+
     // Clear adding-form local states
     setNewLinkTitle("");
     setNewLinkUrl("");
@@ -190,6 +208,18 @@ export default function InstructorCard({
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
 
+    const careerHistory = editedCareerInput
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    const clientCompanies = editedClientsInput
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    const testimonials = editedTestimonialQuote.trim()
+      ? [{ quote: editedTestimonialQuote.trim(), author: editedTestimonialAuthor.trim() }]
+      : [];
+
     const updatedInstructor: Instructor = {
       ...instructor,
       name: editedName.trim(),
@@ -204,6 +234,14 @@ export default function InstructorCard({
       reviewCount: Number(editedReviewCount) || 0,
       portfolioItems: editedPortfolioItems,
       avatar: editedAvatar,
+      // 신뢰신호
+      yearsTeaching: editedYearsTeaching === "" ? undefined : Number(editedYearsTeaching),
+      sessionsCount: editedSessionsCount === "" ? undefined : Number(editedSessionsCount),
+      traineesCount: editedTraineesCount === "" ? undefined : Number(editedTraineesCount),
+      careerHistory,
+      clientCompanies,
+      testimonials,
+      sampleVideoUrl: editedSampleVideoUrl.trim() || undefined,
     };
 
     onUpdate(updatedInstructor);
@@ -225,6 +263,14 @@ export default function InstructorCard({
     setEditedReviewCount(instructor.reviewCount);
     setEditedPortfolioItems(instructor.portfolioItems);
     setEditedAvatar(instructor.avatar);
+    setEditedYearsTeaching(instructor.yearsTeaching ?? "");
+    setEditedSessionsCount(instructor.sessionsCount ?? "");
+    setEditedTraineesCount(instructor.traineesCount ?? "");
+    setEditedCareerInput((instructor.careerHistory ?? []).join(", "));
+    setEditedClientsInput((instructor.clientCompanies ?? []).join(", "));
+    setEditedTestimonialQuote(instructor.testimonials?.[0]?.quote ?? "");
+    setEditedTestimonialAuthor(instructor.testimonials?.[0]?.author ?? "");
+    setEditedSampleVideoUrl(instructor.sampleVideoUrl ?? "");
     setNewLinkTitle("");
     setNewLinkUrl("");
     setIsEditing(false);
@@ -357,13 +403,15 @@ export default function InstructorCard({
                   {instructor.availability}
                 </span>
 
-                {/* Notion Status Sync */}
-                <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] bg-slate-50 text-slate-600 border border-slate-200/60 font-medium">
-                  <svg className="w-3 h-3 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4.17 2.23C3 2.23 2 3.23 2 4.4v15.2C2 20.77 3 21.77 4.17 21.77h15.66C21 21.77 22 20.77 22 19.6V4.4c0-1.17-1-2.17-2.17-2.17H4.17zm11.75 3.32h2.23v12.9h-2.23V5.55zm-1.85 0v12.9H11.5L8.43 9.47v8.98H6.2V5.55h2.57l3.07 6.08V5.55h2.23z"/>
-                  </svg>
-                  연동 완료
-                </span>
+                {/* 노션 프로필 링크 보유 시에만 표시 */}
+                {instructor.notionUrl && (
+                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] bg-slate-50 text-slate-600 border border-slate-200/60 font-medium">
+                    <svg className="w-3 h-3 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4.17 2.23C3 2.23 2 3.23 2 4.4v15.2C2 20.77 3 21.77 4.17 21.77h15.66C21 21.77 22 20.77 22 19.6V4.4c0-1.17-1-2.17-2.17-2.17H4.17zm11.75 3.32h2.23v12.9h-2.23V5.55zm-1.85 0v12.9H11.5L8.43 9.47v8.98H6.2V5.55h2.57l3.07 6.08V5.55h2.23z"/>
+                    </svg>
+                    노션 프로필
+                  </span>
+                )}
               </div>
               <p className="text-slate-500 text-xs font-normal leading-relaxed">{instructor.role}</p>
             </>
@@ -455,6 +503,40 @@ export default function InstructorCard({
         </div>
       </div>
 
+      {/* 신뢰신호 요약 (비편집 표시) — 큐레이터가 담을 강사를 고를 때 검증도 즉시 확인 */}
+      {!isEditing &&
+        (instructor.yearsTeaching ||
+          instructor.sessionsCount ||
+          instructor.traineesCount ||
+          (instructor.clientCompanies && instructor.clientCompanies.length > 0)) && (
+          <div className="mt-3 space-y-2">
+            {(instructor.yearsTeaching || instructor.sessionsCount || instructor.traineesCount) && (
+              <div className="flex flex-wrap gap-1.5">
+                {instructor.yearsTeaching ? (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-brand-blue-light text-brand-blue border border-brand-blue/15">경력 {instructor.yearsTeaching}년</span>
+                ) : null}
+                {instructor.sessionsCount ? (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-brand-blue-light text-brand-blue border border-brand-blue/15">강의 {instructor.sessionsCount}회</span>
+                ) : null}
+                {instructor.traineesCount ? (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-brand-blue-light text-brand-blue border border-brand-blue/15">교육 {instructor.traineesCount.toLocaleString()}명</span>
+                ) : null}
+              </div>
+            )}
+            {instructor.clientCompanies && instructor.clientCompanies.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">강의 기업</span>
+                {instructor.clientCompanies.slice(0, 4).map((c) => (
+                  <span key={c} className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/40">{c}</span>
+                ))}
+                {instructor.clientCompanies.length > 4 && (
+                  <span className="text-[10px] font-semibold text-slate-400">+{instructor.clientCompanies.length - 4}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
       {/* Accordion Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -495,6 +577,111 @@ export default function InstructorCard({
             <p className="text-slate-700 text-xs leading-relaxed font-normal">{instructor.bio}</p>
           )}
         </div>
+
+        {/* 신뢰신호 편집 (검증 자료) — 제안서에 노출되는 핵심 근거 */}
+        {isEditing && (
+          <div className="mt-4 border border-brand-blue/15 bg-brand-blue-light/30 rounded-2xl p-3.5 space-y-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs">🛡️</span>
+              <h4 className="text-[11px] font-extrabold text-slate-800">신뢰신호 (제안서 검증 근거)</h4>
+            </div>
+            <p className="text-[10px] text-text-slate leading-relaxed -mt-1">
+              기업담당자가 강사 선정 시 가장 중요하게 보는 항목입니다. 채울수록 제안서 설득력이 올라갑니다.
+            </p>
+
+            {/* 강의경력 3종 */}
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">강의 경력(년)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editedYearsTeaching}
+                  onChange={(e) => setEditedYearsTeaching(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-center font-bold text-slate-800 focus:outline-none focus:border-brand-blue"
+                  placeholder="8"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">누적 강의(회)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editedSessionsCount}
+                  onChange={(e) => setEditedSessionsCount(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-center font-bold text-slate-800 focus:outline-none focus:border-brand-blue"
+                  placeholder="210"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">교육 인원(명)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editedTraineesCount}
+                  onChange={(e) => setEditedTraineesCount(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-center font-bold text-slate-800 focus:outline-none focus:border-brand-blue"
+                  placeholder="6500"
+                />
+              </div>
+            </div>
+
+            {/* 실무 경력 */}
+            <div>
+              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">실무 경력 (쉼표로 구분)</label>
+              <input
+                type="text"
+                value={editedCareerInput}
+                onChange={(e) => setEditedCareerInput(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 focus:outline-none focus:border-brand-blue"
+                placeholder="前 삼성전자 책임, 前 우아한형제들 PD"
+              />
+            </div>
+
+            {/* 강의 진행 기업 */}
+            <div>
+              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">강의 진행 기업 (쉼표로 구분)</label>
+              <input
+                type="text"
+                value={editedClientsInput}
+                onChange={(e) => setEditedClientsInput(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 focus:outline-none focus:border-brand-blue"
+                placeholder="삼성전자, 카카오, 현대차"
+              />
+            </div>
+
+            {/* 대표 후기 */}
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">대표 수강 후기</label>
+              <textarea
+                value={editedTestimonialQuote}
+                onChange={(e) => setEditedTestimonialQuote(e.target.value)}
+                rows={2}
+                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 focus:outline-none focus:border-brand-blue resize-none leading-relaxed"
+                placeholder="후기 내용 (예: 강의 후 팀 협업 프로세스가 바뀌었습니다.)"
+              />
+              <input
+                type="text"
+                value={editedTestimonialAuthor}
+                onChange={(e) => setEditedTestimonialAuthor(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-600 focus:outline-none focus:border-brand-blue"
+                placeholder="작성자 (예: 삼성전자 디자인팀 이OO 책임)"
+              />
+            </div>
+
+            {/* 샘플 영상 */}
+            <div>
+              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">강의 샘플 영상 URL</label>
+              <input
+                type="text"
+                value={editedSampleVideoUrl}
+                onChange={(e) => setEditedSampleVideoUrl(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-700 focus:outline-none focus:border-brand-blue"
+                placeholder="https://youtu.be/..."
+              />
+            </div>
+          </div>
+        )}
 
         {/* Contact Info (For Internal Agency) */}
         <div className="mt-4 grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
@@ -727,7 +914,7 @@ export default function InstructorCard({
             </div>
           )}
 
-          {!isEditing && (
+          {!isEditing && instructor.notionUrl && (
             <a
               href={instructor.notionUrl}
               target="_blank"
