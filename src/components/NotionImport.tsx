@@ -226,15 +226,23 @@ export default function NotionImport({
 
   const handleStartSync = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!notionUrl || !notionUrl.includes("notion.so")) {
-      alert("올바른 노션 프로필 주소(notion.so)를 입력해 주세요.");
+    const url = notionUrl.trim();
+    // 노션 공유 링크는 notion.so(앱), notion.site(공개페이지), 커스텀 도메인 등 다양함.
+    // 노션 계열 도메인을 폭넓게 허용하고, 형식만 최소 검증.
+    const lower = url.toLowerCase();
+    const isNotionLink =
+      lower.includes("notion.so") ||
+      lower.includes("notion.site") ||
+      lower.includes("notion.com");
+    if (!url || !isNotionLink) {
+      alert("노션 링크를 붙여넣어 주세요.\n(예: https://○○.notion.site/... 또는 https://www.notion.so/...)");
       return;
     }
-    
+
     // Parse target url dynamically
-    const parsedData = parseNotionUrlToMockData(notionUrl);
+    const parsedData = parseNotionUrlToMockData(url);
     setImportedInstructor(parsedData);
-    
+
     setSyncStep("fetching");
     setProgress(0);
   };
@@ -356,9 +364,10 @@ export default function NotionImport({
                   강사가 전달한 노션 링크
                 </label>
                 <input
-                  type="url"
+                  type="text"
+                  inputMode="url"
                   required
-                  placeholder="https://notion.so/username/page-id..."
+                  placeholder="https://○○.notion.site/... 또는 notion.so/..."
                   value={notionUrl}
                   onChange={(e) => setNotionUrl(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl px-4 py-3.5 text-sm text-slate-800 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/20 transition-all font-mono placeholder:text-slate-400 placeholder:font-sans"
