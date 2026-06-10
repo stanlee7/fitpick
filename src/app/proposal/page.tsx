@@ -6,7 +6,6 @@ import { getTemplateStyles } from "../../lib/templates";
 import { decodeProposal, SharedProposal } from "../../lib/proposal";
 import { avatarFor } from "../../lib/avatar";
 import { track } from "../../lib/analytics";
-import { pingOpen } from "../../lib/tracking";
 
 function availabilityLabel(status: string): string {
   return status || "일정 협의";
@@ -27,18 +26,13 @@ export default function ProposalPage() {
     }
     setLoaded(true);
 
-    // GA4 열람 추적: 의뢰사·주제·pid를 실어 "어느 제안서를 누가 열었는지" GA에서 식별 가능하게.
+    // GA4(설정 시)에 익명 집계용 열람 이벤트만 전송. 개별 추적/백엔드 없음.
     const pid = new URLSearchParams(window.location.search).get("pid");
     track("proposal_view", {
       client: decoded?.client || "(unknown)",
       title: decoded?.title || "",
       pid: pid || "",
     });
-
-    // (선택) 백엔드 추적을 켤 경우에만 동작 — NEXT_PUBLIC_API_URL 미설정 시 no-op
-    if (pid && decoded) {
-      pingOpen(pid, decoded.client, decoded.title);
-    }
   }, []);
 
   // 정적 셸/하이드레이션 전엔 빈 화면

@@ -1,28 +1,38 @@
-// 제안서 열람 추적 — 백엔드(NEXT_PUBLIC_API_URL) 설정 시에만 동작.
-// 미설정이면 모든 함수가 무해하게 비활성(no-op)되어 기존 앱 동작에 영향 없음.
+// 보낸 제안서 파이프라인 — 전부 로컬(localStorage). 백엔드/외부 추적 없음.
+// 큐레이터가 제안서를 보낼 때 자동으로 쌓이고, 상태/메모는 직접 기록한다.
 
-const API = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+export type ProposalStatus = "sent" | "opened" | "replied" | "progress" | "won" | "lost";
 
 export interface SentProposal {
   pid: string;
   client: string;
   title: string;
   createdAt: number;
+  status?: ProposalStatus;
+  memo?: string;
 }
 
-export interface OpenStat {
-  pid: string;
-  count: number;
-  lastOpenedAt: string | null;
-}
+export const STATUS_LABELS: Record<ProposalStatus, string> = {
+  sent: "보냄",
+  opened: "열람 확인",
+  replied: "회신 옴",
+  progress: "진행 중",
+  won: "계약 ✓",
+  lost: "종료",
+};
+
+export const STATUS_ORDER: ProposalStatus[] = [
+  "sent",
+  "opened",
+  "replied",
+  "progress",
+  "won",
+  "lost",
+];
 
 const KEY = "fitpick_sent_proposals";
 
-export function trackingEnabled(): boolean {
-  return !!API;
-}
-
-// 짧은 제안서 식별자 생성 (브라우저)
+// 짧은 제안서 식별자 생성(링크에 부여)
 export function genPid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
@@ -36,40 +46,26 @@ export function getSentProposals(): SentProposal[] {
   }
 }
 
-export function saveSentProposal(p: SentProposal): void {
+function writeAll(list: SentProposal[]): void {
   if (typeof window === "undefined") return;
   try {
-    const list = getSentProposals();
-    list.unshift(p);
-    localStorage.setItem(KEY, JSON.stringify(list.slice(0, 200)));
+    localStorage.setItem(KEY, JSON.stringify(list.slice(0, 300)));
   } catch {
     /* localStorage 한계 등은 조용히 무시 */
   }
 }
 
-// 제안서 열람 시 백엔드에 1건 기록(fire-and-forget)
-export function pingOpen(pid: string, client: string, title: string): void {
-  if (!API || !pid) return;
-  try {
-    fetch(`${API}/api/opens`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pid, client, title }),
-      keepalive: true,
-    }).catch(() => {});
-  } catch {
-    /* 네트워크 오류 무시 */
-  }
+export function saveSentProposal(p: SentProposal): void {
+  const list = getSentProposals();
+  list.unshift({ status: "sent", ...p });
+  writeAll(list);
 }
 
-// 큐레이터 대시보드용: 내가 보낸 pid들의 열람 집계 조회
-export async function fetchOpens(pids: string[]): Promise<OpenStat[]> {
-  if (!API || pids.length === 0) return [];
-  try {
-    const res = await fetch(`${API}/api/opens?pids=${encodeURIComponent(pids.join(","))}`);
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
-    return [];
-  }
+export function updateSentProposal(pid: string, patch: Partial<SentProposal>): void {
+  const list = getSentProposals().map((p) => (p.pid === pid ? { ...p, ...patch } : p));
+  writeAll(list);
+}
+
+export function deleteSentProposal(pid: string): void {
+  writeAll(getSentProposals().filter((p) => p.pid !== pid));
 }
