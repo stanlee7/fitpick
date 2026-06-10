@@ -5,7 +5,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("fitpickDesktop", {
   isDesktop: true,
-  appVersion: "0.3.0",
+  appVersion: "0.4.0",
   // 노션 API 직접 연동(데스크톱 한정 — 메인 프로세스가 CORS 없이 호출)
   // opts: { token, databaseId } → { headers: string[], rows: string[][] }
   notionQuery: (opts) => ipcRenderer.invoke("notion:query", opts),
