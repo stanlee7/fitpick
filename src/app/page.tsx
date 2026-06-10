@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { mockInstructors, Instructor } from "../data/mockInstructors";
 import InstructorCard from "../components/InstructorCard";
 import NotionImport from "../components/NotionImport";
+import ResumeImport from "../components/ResumeImport";
 import CurationPanel from "../components/CurationPanel";
 import IntroView from "../components/IntroView";
 import SentProposalsPanel from "../components/SentProposalsPanel";
@@ -17,6 +18,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("전체");
   const [showNotionModal, setShowNotionModal] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
 
   // Hydrate data from localStorage (Local-First Security spec)
   useEffect(() => {
@@ -234,15 +236,24 @@ export default function Home() {
           </p>
         </div>
 
-        <div>
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowNotionModal(true)}
+            onClick={() => setShowResumeModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-blue border border-brand-blue/10 hover:bg-brand-blue-hover text-white font-semibold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
           >
-            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            이력서로 강사 추가
+          </button>
+          <button
+            onClick={() => setShowNotionModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
+          >
+            <svg className="w-4 h-4 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4.17 2.23C3 2.23 2 3.23 2 4.4v15.2C2 20.77 3 21.77 4.17 21.77h15.66C21 21.77 22 20.77 22 19.6V4.4c0-1.17-1-2.17-2.17-2.17H4.17zm11.75 3.32h2.23v12.9h-2.23V5.55zm-1.85 0v12.9H11.5L8.43 9.47v8.98H6.2V5.55h2.57l3.07 6.08V5.55h2.23z"/>
             </svg>
-            노션 프로필 원클릭 연동
+            노션 링크
           </button>
         </div>
       </header>
@@ -443,6 +454,17 @@ export default function Home() {
         <NotionImport
           onClose={() => setShowNotionModal(false)}
           onImportSuccess={handleImportSuccess}
+        />
+      )}
+
+      {/* Resume/Profile Import Modal */}
+      {showResumeModal && (
+        <ResumeImport
+          onClose={() => setShowResumeModal(false)}
+          onImportSuccess={(inst) => {
+            setInstructors((prev) => [inst, ...prev]);
+            track("instructor_added", { method: "resume" });
+          }}
         />
       )}
     </div>
