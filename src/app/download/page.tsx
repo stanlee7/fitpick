@@ -5,7 +5,7 @@ import { track } from "../../lib/analytics";
 
 export default function DownloadPage() {
   // 깃허브 릴리스의 정식 .exe (NSIS 설치 프로그램)
-  const GITHUB_EXE_URL = "https://github.com/stanlee7/fitpick/releases/download/v0.3.0/FitPick_Setup_0.3.0.exe";
+  const GITHUB_EXE_URL = "https://github.com/stanlee7/fitpick/releases/download/v0.4.0/FitPick_Setup_0.4.0.exe";
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans">
@@ -15,7 +15,7 @@ export default function DownloadPage() {
           <a href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#0064ff] text-white flex items-center justify-center font-outfit font-black text-sm shadow-sm">FP</div>
             <span className="font-outfit font-black text-base tracking-tight">FitPick</span>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono">v0.3</span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono">v0.4</span>
           </a>
           <a
             href="/"
@@ -44,7 +44,7 @@ export default function DownloadPage() {
           <div className="mt-9 flex flex-col items-center gap-3">
             <a
               href={GITHUB_EXE_URL}
-              onClick={() => track("app_download", { version: "0.3.0", platform: "win" })}
+              onClick={() => track("app_download", { version: "0.4.0", platform: "win" })}
               className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-[#0064ff] hover:bg-[#0053db] text-white text-sm font-bold shadow-[0_8px_24px_rgba(0,100,255,0.22)] active:scale-[0.98] transition-all cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@ export default function DownloadPage() {
               </svg>
               Windows용 다운로드 (.exe)
             </a>
-            <p className="text-[11px] text-slate-400 font-mono">FitPick_Setup_0.3.0.exe · NSIS 설치 프로그램 · 약 138MB</p>
+            <p className="text-[11px] text-slate-400 font-mono">FitPick_Setup_0.4.0.exe · NSIS 설치 프로그램 · 약 149MB</p>
             <a href="/" className="text-xs font-bold text-[#0064ff] hover:underline mt-1">설치 없이 웹으로 바로 쓰기 →</a>
           </div>
         </div>
