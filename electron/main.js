@@ -1,7 +1,89 @@
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, ipcMain } = require("electron");
 const path = require("path");
 
 let mainWindow;
+
+// ───────── 노션 API 직접 연동 (메인 프로세스 = CORS 없음) ─────────
+const NOTION_VERSION = "2022-06-28";
+
+async function notionApi(token, method, pathStr, body) {
+  const res = await fetch(`https://api.notion.com/v1${pathStr}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data && data.message ? data.message : `Notion API ${res.status}`);
+  }
+  return data;
+}
+
+// 노션 속성 값 → 평문 문자열
+function notionValue(prop) {
+  if (!prop || !prop.type) return "";
+  const t = prop.type;
+  const v = prop[t];
+  switch (t) {
+    case "title":
+    case "rich_text":
+      return (v || []).map((x) => x.plain_text || "").join("");
+    case "number":
+      return v == null ? "" : String(v);
+    case "select":
+    case "status":
+      return v && v.name ? v.name : "";
+    case "multi_select":
+      return (v || []).map((x) => x.name).join(", ");
+    case "people":
+      return (v || []).map((x) => x.name || "").join(", ");
+    case "files":
+      return (v || []).map((x) => x.name || "").join(", ");
+    case "email":
+    case "phone_number":
+    case "url":
+      return v || "";
+    case "checkbox":
+      return v ? "Y" : "";
+    case "date":
+      return v && v.start ? v.start : "";
+    case "formula":
+      return v ? notionValue({ type: v.type, [v.type]: v[v.type] }) : "";
+    case "rollup":
+      if (v && v.type === "array") return (v.array || []).map((a) => notionValue(a)).join(", ");
+      return v && v[v.type] != null ? String(v[v.type]) : "";
+    default:
+      return "";
+  }
+}
+
+async function notionQueryDatabase(token, databaseId) {
+  const db = await notionApi(token, "GET", `/databases/${databaseId}`);
+  const headers = Object.keys(db.properties || {});
+  const rows = [];
+  let cursor;
+  do {
+    const body = cursor ? { page_size: 100, start_cursor: cursor } : { page_size: 100 };
+    const page = await notionApi(token, "POST", `/databases/${databaseId}/query`, body);
+    for (const result of page.results || []) {
+      const props = result.properties || {};
+      rows.push(headers.map((h) => notionValue(props[h])));
+    }
+    cursor = page.has_more ? page.next_cursor : undefined;
+  } while (cursor);
+  return { headers, rows };
+}
+
+ipcMain.handle("notion:query", async (_e, opts) => {
+  const token = opts && opts.token;
+  const databaseId = opts && opts.databaseId;
+  if (!token || !databaseId) throw new Error("토큰과 데이터베이스 ID가 필요합니다.");
+  return await notionQueryDatabase(token, databaseId);
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({

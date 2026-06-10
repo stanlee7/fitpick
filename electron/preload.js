@@ -1,10 +1,12 @@
 // 핏픽(FitPick) Electron Preload Script
-// 현재는 온디바이스 로컬 브라우저 보안 규격을 전면 적용하므로 샌드박스로 가동합니다.
-// 향후 PC 네이티브 파일 탐색기 연동이나 시스템 다이얼로그 호출 필요 시 이곳에 노출할 API를 증설합니다.
+// contextIsolation + sandbox 하에서 렌더러에 안전한 데스크톱 전용 API만 노출한다.
 
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("fitpickDesktop", {
   isDesktop: true,
   appVersion: "0.3.0",
+  // 노션 API 직접 연동(데스크톱 한정 — 메인 프로세스가 CORS 없이 호출)
+  // opts: { token, databaseId } → { headers: string[], rows: string[][] }
+  notionQuery: (opts) => ipcRenderer.invoke("notion:query", opts),
 });

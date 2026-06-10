@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { mockInstructors, Instructor } from "../data/mockInstructors";
 import InstructorCard from "../components/InstructorCard";
-import NotionImport from "../components/NotionImport";
+import NotionApiImport from "../components/NotionApiImport";
 import ResumeImport from "../components/ResumeImport";
 import CsvImport from "../components/CsvImport";
 import CurationPanel from "../components/CurationPanel";
@@ -65,13 +65,6 @@ export default function Home() {
   // Clear selections
   const handleClearSelection = () => {
     setSelectedIds([]);
-  };
-
-  // Import Notion Success Handler
-  const handleImportSuccess = (newInstructor: Instructor) => {
-    setInstructors((prev) => [newInstructor, ...prev]);
-    setShowNotionModal(false);
-    track("instructor_added", { method: "notion" });
   };
 
   // Update Instructor
@@ -264,7 +257,7 @@ export default function Home() {
             <svg className="w-4 h-4 text-slate-800" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4.17 2.23C3 2.23 2 3.23 2 4.4v15.2C2 20.77 3 21.77 4.17 21.77h15.66C21 21.77 22 20.77 22 19.6V4.4c0-1.17-1-2.17-2.17-2.17H4.17zm11.75 3.32h2.23v12.9h-2.23V5.55zm-1.85 0v12.9H11.5L8.43 9.47v8.98H6.2V5.55h2.57l3.07 6.08V5.55h2.23z"/>
             </svg>
-            노션 링크
+            노션 연동
           </button>
         </div>
       </header>
@@ -460,11 +453,14 @@ export default function Home() {
         </footer>
       )}
 
-      {/* Notion Import Modal System */}
+      {/* Notion API Import (desktop) / guide (web) */}
       {showNotionModal && (
-        <NotionImport
+        <NotionApiImport
           onClose={() => setShowNotionModal(false)}
-          onImportSuccess={handleImportSuccess}
+          onImportSuccess={(insts) => {
+            setInstructors((prev) => [...insts, ...prev]);
+            track("instructor_added", { method: "notion_api", count: insts.length });
+          }}
         />
       )}
 
