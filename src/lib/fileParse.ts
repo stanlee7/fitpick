@@ -18,8 +18,8 @@ export async function extractTextFromFile(file: File): Promise<string> {
 
 async function extractPdf(file: File): Promise<string> {
   const pdfjs = await import("pdfjs-dist");
-  // 워커는 버전에 맞는 CDN에서 로드(웹). pdfjs 버전과 동일하게 핀.
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+  // 워커는 jsdelivr(npm 패키지 그대로 서빙)에서 로드 → 설치 버전과 파일이 정확히 일치.
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
   const buf = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: buf }).promise;
