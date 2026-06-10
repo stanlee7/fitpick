@@ -5,6 +5,7 @@ import { mockInstructors, Instructor } from "../data/mockInstructors";
 import InstructorCard from "../components/InstructorCard";
 import NotionImport from "../components/NotionImport";
 import ResumeImport from "../components/ResumeImport";
+import CsvImport from "../components/CsvImport";
 import CurationPanel from "../components/CurationPanel";
 import IntroView from "../components/IntroView";
 import SentProposalsPanel from "../components/SentProposalsPanel";
@@ -19,6 +20,7 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState<string>("전체");
   const [showNotionModal, setShowNotionModal] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [showCsvModal, setShowCsvModal] = useState(false);
 
   // Hydrate data from localStorage (Local-First Security spec)
   useEffect(() => {
@@ -244,7 +246,16 @@ export default function Home() {
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            이력서로 강사 추가
+            이력서 추가
+          </button>
+          <button
+            onClick={() => setShowCsvModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
+          >
+            <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
+            </svg>
+            CSV 일괄
           </button>
           <button
             onClick={() => setShowNotionModal(true)}
@@ -464,6 +475,17 @@ export default function Home() {
           onImportSuccess={(inst) => {
             setInstructors((prev) => [inst, ...prev]);
             track("instructor_added", { method: "resume" });
+          }}
+        />
+      )}
+
+      {/* CSV Bulk Import Modal */}
+      {showCsvModal && (
+        <CsvImport
+          onClose={() => setShowCsvModal(false)}
+          onImportSuccess={(insts) => {
+            setInstructors((prev) => [...insts, ...prev]);
+            track("instructor_added", { method: "csv", count: insts.length });
           }}
         />
       )}
