@@ -4,103 +4,135 @@ import React from "react";
 import { track } from "../../lib/analytics";
 
 export default function DownloadPage() {
-  // [💡 VIP 배포 팁] 파트너님의 깃허브 레포지토리 주소나 다운로드 주소에 맞춰 아래 URL을 원하는 CDN 주소로 변경하여 배포 가능합니다!
+  // 깃허브 릴리스의 정식 .exe (NSIS 설치 프로그램)
   const GITHUB_EXE_URL = "https://github.com/stanlee7/fitpick/releases/download/v0.3.0/FitPick_Setup_0.3.0.exe";
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-between text-slate-900 font-sans relative overflow-hidden">
-      {/* 백그라운드 비주얼 네온 라이트 효과 */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none"></div>
-
-      {/* 글로벌 탑 헤더 네비게이션 배너 */}
-      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between border-b border-slate-200/40 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-[#3182f6] flex items-center justify-center shadow-sm">
-            <span className="font-sans font-black text-white text-sm">FP</span>
-          </div>
-          <div>
-            <h1 className="font-sans font-black text-base tracking-tight text-slate-900">핏픽 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-650">v0.3.0</span></h1>
-            <p className="text-[9px] text-slate-400 font-medium">Smart Instructor Curation System</p>
-          </div>
+    <div className="min-h-screen bg-white text-slate-900 font-sans">
+      {/* ───────── 상단 네비게이션 ───────── */}
+      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#0064ff] text-white flex items-center justify-center font-outfit font-black text-sm shadow-sm">FP</div>
+            <span className="font-outfit font-black text-base tracking-tight">FitPick</span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono">v0.3</span>
+          </a>
+          <a
+            href="/"
+            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+          >
+            웹으로 바로 시작 →
+          </a>
         </div>
-        <a
-          href="/"
-          className="text-xs font-bold text-slate-600 hover:text-[#3182f6] transition-colors"
-        >
-          대시보드로 돌아가기 →
-        </a>
       </header>
 
-      {/* 메인 히어로 다운로드 카드 섹션 */}
-      <main className="flex-1 max-w-4xl mx-auto px-6 py-16 text-center flex flex-col items-center justify-center space-y-10 relative z-10">
-        
-        {/* 화려한 비주얼 바운스 링 */}
-        <div className="relative w-16 h-16 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full bg-[#3182f6]/10 animate-ping"></div>
-          <div className="w-14 h-14 rounded-3xl bg-[#3182f6] flex items-center justify-center shadow-lg shadow-blue-500/25">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <span className="text-[10px] font-extrabold text-[#3182f6] tracking-widest uppercase bg-blue-50/80 border border-blue-200/50 px-3.5 py-1.5 rounded-full shadow-sm">
-            ★ FITPICK 정식 데스크톱 클라이언트 배포
+      {/* ───────── 히어로 ───────── */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#f5f8ff] to-white">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[640px] h-[640px] bg-[#0064ff]/8 rounded-full blur-[120px] pointer-events-none" />
+        <div className="relative max-w-3xl mx-auto px-5 sm:px-8 pt-20 pb-16 text-center">
+          <span className="inline-block text-[11px] font-bold tracking-wide text-[#0064ff] bg-[#0064ff]/8 px-3.5 py-1.5 rounded-full mb-6">
+            데스크톱 앱 (Windows)
           </span>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-950 leading-tight">
-            핏픽 (FitPick) 정식 버전 다운로드
-          </h2>
-          <p className="text-xs md:text-sm text-slate-500 font-semibold max-w-xl mx-auto leading-relaxed">
-            CORS 통신 제한이 없는 강력한 데스크톱 네이티브 성능! <br />
-            노션 원클릭 프로필 동기화 및 클라이언트 제안 열람 추적 기술을 한 몸에 누리세요.
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.15] text-slate-900">
+            FitPick을<br className="hidden sm:block" />
+            <span className="text-[#0064ff]">내 PC에</span> 설치하세요.
+          </h1>
+          <p className="mt-6 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
+            인터넷 없이도 강사풀을 관리하고, 데이터를 내 PC에만 보관하세요. 웹과 똑같은 신뢰신호 제안서·이력서 가져오기를 데스크톱에서 그대로.
           </p>
-        </div>
 
-        {/* 정식 다운로드 초고속 CDN 링크 버튼 */}
-        <div className="space-y-4">
-          <a
-            href={GITHUB_EXE_URL}
-            onClick={() => track("app_download", { version: "0.3.0", platform: "win" })}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-[#3182f6] hover:bg-[#1b64da] text-white font-bold rounded-3xl shadow-[0_12px_40px_rgba(49,130,246,0.22)] hover:shadow-[0_16px_50px_rgba(49,130,246,0.32)] transform hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all text-xs md:text-sm cursor-pointer"
-          >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-            </svg>
-            핏픽 정식 앱 초고속 다운로드 (Windows .exe)
-          </a>
-          <p className="text-[9px] text-slate-400 font-mono font-semibold">
-            파일명: FitPick Setup 0.3.0.exe (NSIS 설치 프로그램, 약 138MB)
-          </p>
-        </div>
-
-        {/* 3대 핵심 상용 킬러 피처 배지 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 w-full max-w-3xl">
-          <div className="bg-white/70 backdrop-blur-[2px] p-6 rounded-[28px] border border-slate-100 shadow-sm text-left space-y-2.5 transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-md">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-sm">🔒</div>
-            <h3 className="text-xs font-bold text-slate-900">로컬 암호화 보안 스토리지</h3>
-            <p className="text-[10px] text-slate-500 leading-normal font-medium">강사의 연락처 및 민감 정보를 클라우드에 노출하지 않고, 오직 파트너님의 PC 내부 브라우저 저장소에만 안전하게 암호화 보존합니다.</p>
-          </div>
-          
-          <div className="bg-white/70 backdrop-blur-[2px] p-6 rounded-[28px] border border-slate-100 shadow-sm text-left space-y-2.5 transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-md">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-sm">⚡</div>
-            <h3 className="text-xs font-bold text-slate-900">노션 1초 양방향 동기화</h3>
-            <p className="text-[10px] text-slate-500 leading-normal font-medium">강사들이 건네준 Notion 프로필 주소를 넣는 즉시 인적사항과 소개서 파일, 강의 이력이 초고속 파싱되어 에이전시 데이터로 즉시 동기화됩니다.</p>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-[2px] p-6 rounded-[28px] border border-slate-100 shadow-sm text-left space-y-2.5 transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:shadow-md">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-sm">👁️</div>
-            <h3 className="text-xs font-bold text-slate-900">제안 열람 실시간 추적</h3>
-            <p className="text-[10px] text-slate-500 leading-normal font-medium">클라이언트가 모바일이나 PC로 큐레이션 제안 링크를 열어보는 순간 즉각적인 알림 푸시를 수신하여 최적의 통화 영업 기회를 쟁취합니다.</p>
+          <div className="mt-9 flex flex-col items-center gap-3">
+            <a
+              href={GITHUB_EXE_URL}
+              onClick={() => track("app_download", { version: "0.3.0", platform: "win" })}
+              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-[#0064ff] hover:bg-[#0053db] text-white text-sm font-bold shadow-[0_8px_24px_rgba(0,100,255,0.22)] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Windows용 다운로드 (.exe)
+            </a>
+            <p className="text-[11px] text-slate-400 font-mono">FitPick_Setup_0.3.0.exe · NSIS 설치 프로그램 · 약 138MB</p>
+            <a href="/" className="text-xs font-bold text-[#0064ff] hover:underline mt-1">설치 없이 웹으로 바로 쓰기 →</a>
           </div>
         </div>
+      </section>
 
-      </main>
+      {/* ───────── 왜 데스크톱? ───────── */}
+      <section className="max-w-5xl mx-auto px-5 sm:px-8 py-20">
+        <div className="text-center mb-12">
+          <span className="text-[11px] font-bold text-[#0064ff] uppercase tracking-widest">Why desktop</span>
+          <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight">데스크톱 앱의 장점</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[
+            { icon: "📴", t: "오프라인에서도 동작", d: "인터넷 연결 없이도 강사풀 관리와 제안서 작성이 가능합니다." },
+            { icon: "💻", t: "완전 로컬 저장", d: "강사 정보가 내 PC에만 저장됩니다. 클라우드 업로드 없이 내 손 안에." },
+            { icon: "✨", t: "웹과 동일한 기능", d: "신뢰신호 제안서, 이력서 가져오기, 보낸 제안서 관리 — 웹과 똑같이." },
+          ].map((c) => (
+            <div key={c.t} className="rounded-3xl border border-slate-100 bg-slate-50/60 p-6">
+              <div className="text-2xl mb-3">{c.icon}</div>
+              <h3 className="text-sm font-bold text-slate-900">{c.t}</h3>
+              <p className="mt-2 text-xs text-slate-500 leading-relaxed">{c.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {/* 정식 글로벌 하단 정보 */}
-      <footer className="w-full py-6 text-center border-t border-slate-200/40 bg-slate-50 text-[9px] text-slate-400 font-mono relative z-10">
-        © 2026 FitPick Inc. Smart Agency Instructor Curation Solution. All rights reserved.
+      {/* ───────── 기능 리캡 ───────── */}
+      <section className="bg-[#f7f9fc] border-y border-slate-100">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-20">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">데스크톱에서도 그대로</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {[
+              { icon: "🛡️", t: "신뢰신호 제안서", d: "경력·고객사·후기를 담아 기업 담당자가 윗선 보고에 바로 쓰는 제안서로." },
+              { icon: "📑", t: "이력서로 강사 추가", d: "PDF·DOCX 이력서를 넣으면 강사 카드로. (AI 키 연결 시 자동 정리)" },
+              { icon: "📨", t: "보낸 제안서 관리", d: "보낸 제안서의 상태·메모를 직접 기록해 파이프라인을 관리." },
+            ].map((f) => (
+              <div key={f.t} className="rounded-3xl bg-white border border-slate-100 p-6 shadow-sm">
+                <div className="text-2xl mb-3">{f.icon}</div>
+                <h3 className="text-sm font-bold text-slate-900">{f.t}</h3>
+                <p className="mt-2 text-xs text-slate-500 leading-relaxed">{f.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── 설치 3단계 ───────── */}
+      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-20">
+        <div className="text-center mb-14">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight">설치는 3단계</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { n: "1", t: "다운로드", d: "위 버튼으로 설치 파일(.exe)을 내려받습니다." },
+            { n: "2", t: "설치 실행", d: "내려받은 파일을 실행하면 자동으로 설치됩니다." },
+            { n: "3", t: "바로 시작", d: "바탕화면의 핏픽 아이콘으로 실행해 강사풀을 시작하세요." },
+          ].map((s) => (
+            <div key={s.n} className="relative rounded-3xl bg-white border border-slate-100 p-7 shadow-sm">
+              <div className="w-9 h-9 rounded-full bg-[#0064ff] text-white font-black flex items-center justify-center mb-4">{s.n}</div>
+              <h3 className="text-base font-bold text-slate-900">{s.t}</h3>
+              <p className="mt-2 text-xs text-slate-500 leading-relaxed">{s.d}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-[11px] text-slate-400 mt-8 leading-relaxed">
+          ※ 설치 시 Windows의 &quot;알 수 없는 게시자&quot; 안내가 나오면 &quot;추가 정보 → 실행&quot;을 눌러주세요. (코드 서명 미적용 배포판)
+        </p>
+      </section>
+
+      {/* ───────── 푸터 ───────── */}
+      <footer className="border-t border-slate-100 bg-white">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-slate-400">
+            <div className="w-6 h-6 rounded-lg bg-[#0064ff] text-white flex items-center justify-center font-outfit font-black text-[10px]">FP</div>
+            <span className="text-[11px] font-mono">© 2026 FitPick — 강사 큐레이션 · 제안서 생성</span>
+          </div>
+          <a href="/" className="text-[11px] font-bold text-[#0064ff] hover:underline font-mono">웹으로 바로 시작 →</a>
+        </div>
       </footer>
     </div>
   );
