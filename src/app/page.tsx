@@ -8,7 +8,7 @@ import ResumeImport from "../components/ResumeImport";
 import CsvImport from "../components/CsvImport";
 import CurationPanel from "../components/CurationPanel";
 import IntroView from "../components/IntroView";
-import SentProposalsPanel from "../components/SentProposalsPanel";
+import PipelineBoard from "../components/PipelineBoard";
 import { track, FEEDBACK_URL } from "../lib/analytics";
 
 export default function Home() {
@@ -345,8 +345,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 보낸 제안서 열람 현황 (백엔드 설정 시에만 표시) */}
-          <SentProposalsPanel />
+          {/* 배정 파이프라인: 의뢰접수→정산까지 로컬 추적 */}
+          <PipelineBoard />
 
           {/* Search, Filter Bar Container */}
           <div className="glass-panel p-4 rounded-[24px] border-slate-200/40 space-y-3">

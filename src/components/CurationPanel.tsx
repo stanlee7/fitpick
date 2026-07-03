@@ -6,7 +6,7 @@ import { Instructor } from "../data/mockInstructors";
 import { track } from "../lib/analytics";
 import { TemplateType, getTemplateStyles } from "../lib/templates";
 import { encodeProposal, getShareBase, SharedProposal } from "../lib/proposal";
-import { genPid, saveSentProposal } from "../lib/tracking";
+import { genPid, upsertDealFromProposal } from "../lib/pipeline";
 
 interface CurationPanelProps {
   selectedInstructors: Instructor[];
@@ -112,9 +112,9 @@ export default function CurationPanel({
         sampleVideoUrl: inst.sampleVideoUrl,
       })),
     };
-    // 열람 추적용 제안서 식별자(pid)를 링크에 부여하고, 보낸 내역을 로컬에 저장.
+    // 제안서 식별자(pid)를 링크에 부여하고, 배정 파이프라인에 의뢰 건으로 기록.
     const pid = genPid();
-    saveSentProposal({ pid, client: payload.client, title: payload.title, createdAt: Date.now() });
+    upsertDealFromProposal(pid, payload.client, payload.title);
     const previewUrl = `${getShareBase()}/proposal?pid=${pid}#p=${encodeProposal(payload)}`;
     track("proposal_link_copied", { instructors: selectedInstructors.length });
 

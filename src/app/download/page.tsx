@@ -68,7 +68,7 @@ export default function DownloadPage() {
           {[
             { icon: "📴", t: "오프라인에서도 동작", d: "인터넷 연결 없이도 강사풀 관리와 제안서 작성이 가능합니다." },
             { icon: "💻", t: "완전 로컬 저장", d: "강사 정보가 내 PC에만 저장됩니다. 클라우드 업로드 없이 내 손 안에." },
-            { icon: "✨", t: "웹과 동일한 기능", d: "신뢰신호 제안서, 이력서 가져오기, 보낸 제안서 관리 — 웹과 똑같이." },
+            { icon: "✨", t: "웹과 동일한 기능", d: "신뢰신호 제안서, 이력서 가져오기, 배정 파이프라인 — 웹과 똑같이." },
           ].map((c) => (
             <div key={c.t} className="rounded-3xl border border-slate-100 bg-slate-50/60 p-6">
               <div className="text-2xl mb-3">{c.icon}</div>
@@ -89,7 +89,7 @@ export default function DownloadPage() {
             {[
               { icon: "🛡️", t: "신뢰신호 제안서", d: "경력·고객사·후기를 담아 기업 담당자가 윗선 보고에 바로 쓰는 제안서로." },
               { icon: "📑", t: "이력서로 강사 추가", d: "PDF·DOCX 이력서를 넣으면 강사 카드로. (AI 키 연결 시 자동 정리)" },
-              { icon: "📨", t: "보낸 제안서 관리", d: "보낸 제안서의 상태·메모를 직접 기록해 파이프라인을 관리." },
+              { icon: "📋", t: "배정 파이프라인", d: "의뢰접수부터 정산까지 단계·일정·강의료를 직접 기록해 추적." },
             ].map((f) => (
               <div key={f.t} className="rounded-3xl bg-white border border-slate-100 p-6 shadow-sm">
                 <div className="text-2xl mb-3">{f.icon}</div>
